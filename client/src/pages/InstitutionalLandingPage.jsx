@@ -980,11 +980,11 @@ export default function InstitutionalLandingPage({ initialOpenLogin = false }) {
 
             <form onSubmit={handleLoginSubmit} className="gov-modal-form">
               <div className="gov-form-group">
-                <label className="gov-form-label">Email / Registration Number</label>
+                <label className="gov-form-label">Email or Registration Number</label>
                 <input
-                  type="email"
+                  type="text"
                   className="gov-form-input"
-                  placeholder="Enter your Email or Registration No."
+                  placeholder="e.g. student1@smartcampus.edu or CSE2021001"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

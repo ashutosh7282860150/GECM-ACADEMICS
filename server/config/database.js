@@ -39,10 +39,18 @@ const query = async (text, params = []) => {
   // MOCK STORE QUERY FALLBACK ENGINE
   const cleanSql = text.replace(/\s+/g, ' ').trim().toLowerCase();
   
-  // 1. SELECT users BY EMAIL
-  if (cleanSql.includes('from users') && cleanSql.includes('email = $1')) {
-    const email = params[0]?.toLowerCase();
-    const user = mockStore.users.find(u => u.email.toLowerCase() === email && u.is_active);
+  // 1. SELECT users BY EMAIL / ENROLLMENT NO / EMPLOYEE ID
+  if (cleanSql.includes('from users') && (cleanSql.includes('email') || cleanSql.includes('enrollment_no') || cleanSql.includes('$1')) && !cleanSql.includes('where id = $1')) {
+    const identifier = (params[0] || '').toLowerCase().trim();
+    const user = mockStore.users.find(u => {
+      if (!u.is_active) return false;
+      if (u.email && u.email.toLowerCase() === identifier) return true;
+      const st = mockStore.students.find(s => s.user_id === u.id);
+      if (st && st.enrollment_no && st.enrollment_no.toLowerCase() === identifier) return true;
+      const fc = mockStore.faculty.find(f => f.user_id === u.id);
+      if (fc && fc.employee_id && fc.employee_id.toLowerCase() === identifier) return true;
+      return false;
+    });
     return { rows: user ? [user] : [], rowCount: user ? 1 : 0 };
   }
 

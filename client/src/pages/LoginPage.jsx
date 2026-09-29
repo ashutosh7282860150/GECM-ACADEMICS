@@ -313,70 +313,65 @@ export default function LoginPage() {
           </div>
 
           {/* Role description */}
-          <div className="login-role-desc" style={{ color: currentRole.color, background: currentRole.bg }}>
+          <div className="login-role-desc" style={{ color: currentRole.color, background: currentRole.bg, marginBottom: '16px' }}>
             <span>{currentRole.icon}</span>
             <span>{currentRole.desc}</span>
           </div>
 
-          {/* Demo Credentials Box */}
-          <div className="login-demo-box">
-            <div className="login-demo-header">
-              <span className="login-demo-badge">🧪 DEMO</span>
-              <span className="login-demo-title">Development Credentials</span>
+          {/* Role-specific Demo Quick Fill Helper */}
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: currentRole.color, background: currentRole.bg, padding: '2px 8px', borderRadius: '6px' }}>
+                ⚡ QUICK DEMO
+              </span>
+              <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
+                {currentRole.label} Credentials
+              </span>
             </div>
-            <div className="login-demo-card">
-              <div className="login-demo-info">
-                <div className="login-demo-name">
-                  {currentRole.icon} {currentRole.demo.name}
-                </div>
-                <div className="login-demo-hint">{currentRole.demo.hint}</div>
-                <div className="login-demo-creds">
-                  <span className="login-demo-cred-item">
-                    <strong>Email:</strong> {currentRole.demo.email}
-                  </span>
-                  <span className="login-demo-cred-item">
-                    <strong>Password:</strong> password123
-                  </span>
-                </div>
-              </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               <button
                 type="button"
-                className="login-demo-fill-btn"
                 onClick={() => fillDemo(currentRole.demo.email, currentRole.demo.password)}
                 disabled={loading}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '5px 10px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  color: '#0f172a',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
               >
-                Use Demo
+                <span>{currentRole.icon}</span>
+                <span>{currentRole.demo.name} ({currentRole.demo.email})</span>
               </button>
+              {extraDemos.map(d => (
+                <button
+                  key={d.email}
+                  type="button"
+                  onClick={() => fillDemo(d.email, d.password)}
+                  disabled={loading}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '5px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {d.label} ({d.email})
+                </button>
+              ))}
             </div>
-
-            {/* Extra demos for administrator role */}
-            {extraDemos.length > 0 && (
-              <div className="login-extra-demos">
-                <div className="login-extra-demos-label">Other staff roles:</div>
-                <div className="login-extra-demos-pills">
-                  {extraDemos.map(d => (
-                    <button
-                      key={d.email}
-                      type="button"
-                      className="login-extra-pill"
-                      onClick={() => fillDemo(d.email, d.password)}
-                      disabled={loading}
-                      title={d.hint}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
-
-          {/* Demo filled indicator */}
-          {demoFilled && (
-            <div className="login-demo-filled-notice">
-              ✅ Demo credentials filled. Review and click <strong>Login</strong>.
-            </div>
-          )}
 
           {/* Login Form */}
           <form

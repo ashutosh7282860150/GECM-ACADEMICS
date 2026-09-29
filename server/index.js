@@ -3,7 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
-const rateLimit = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const app = express();
@@ -30,6 +30,7 @@ const limiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX) || 500,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false }, // suppress proxy-header warning in dev
   message: { success: false, message: 'Too many requests, please try again later.' },
   skip: (req) => {
     if (req.method === 'OPTIONS') return true;
@@ -48,12 +49,13 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // only count FAILED login attempts
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     message: 'Too many login attempts from this IP. Please wait 15 minutes before trying again.',
     retryAfter: 15
   },
-  keyGenerator: (req) => req.ip, // per-IP tracking
+  keyGenerator: (req) => ipKeyGenerator(req), // IPv4 + IPv6 safe per-IP tracking
 });
 
 // Lenient limiter for /me and /change-password (called frequently by the app)
@@ -62,6 +64,7 @@ const sessionLimiter = rateLimit({
   max: 300, // very generous — page refresh, tab focus, etc.
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { success: false, message: 'Too many session requests. Please try again shortly.' },
   skip: (req) => req.method === 'OPTIONS',
 });

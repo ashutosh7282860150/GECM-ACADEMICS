@@ -177,7 +177,7 @@ export default function AppLayout({ children }) {
               <GECMLogo size="small" showText={false} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.25), rgba(6, 182, 212, 0.25))', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     GECM ACADEMICS
                   </span>
                   <span className="topbar-title" style={{ fontSize: '1.25rem' }}>{pageTitle}</span>

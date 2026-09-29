@@ -1,0 +1,19 @@
+{
+  "name": "gecm-academics-erp-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GECM ACADEMICS — Government Engineering College Madhubani Academic Management & ERP Portal",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "start": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"npm run start --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "db:setup": "npm run db:setup --prefix server",
+    "db:seed": "npm run db:seed --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -244,7 +244,7 @@ export default function InstitutionalLandingPage({ initialOpenLogin = false }) {
   };
 
   const getDashboardRoute = () => {
-    if (!user) return '/login';
+    if (!user) return '/';
     const ROLE_REDIRECT = {
       student: '/student/dashboard',
       faculty: '/faculty/dashboard',

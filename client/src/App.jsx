@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import AppLayout from './layouts/AppLayout';
 
 // Pages
-import LoginPage from './pages/LoginPage';
 import InstitutionalLandingPage from './pages/InstitutionalLandingPage';
 
 // Student
@@ -54,12 +53,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return (
       <div className="loading-page">
         <div className="spinner" />
-        <span>Loading SmartCampus ERP...</span>
+        <span>Loading GECM ACADEMICS...</span>
       </div>
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
   if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
 
   return <AppLayout>{children}</AppLayout>;
@@ -74,11 +73,11 @@ const RootRedirect = () => {
   if (loading) return (
     <div className="loading-page">
       <div className="spinner" />
-      <span>Loading SmartCampus ERP...</span>
+      <span>Loading GECM ACADEMICS...</span>
     </div>
   );
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
 
   const ROLE_HOME = {
     student: '/student/dashboard',
@@ -89,7 +88,7 @@ const RootRedirect = () => {
     admin: '/admin/dashboard',
   };
 
-  return <Navigate to={ROLE_HOME[user.role] || '/login'} replace />;
+  return <Navigate to={ROLE_HOME[user.role] || '/'} replace />;
 };
 
 // =============================================
@@ -97,8 +96,8 @@ const RootRedirect = () => {
 // =============================================
 const AppRoutes = () => (
   <Routes>
-    {/* Public */}
-    <Route path="/login" element={<LoginPage />} />
+    {/* Public Routes — All login handled via institutional modal */}
+    <Route path="/login" element={<InstitutionalLandingPage initialOpenLogin={true} />} />
     <Route path="/" element={<InstitutionalLandingPage />} />
 
     {/* ── STUDENT ── */}

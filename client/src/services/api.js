@@ -26,11 +26,11 @@ api.interceptors.response.use(
     const isLoginEndpoint = error.config?.url?.includes('/auth/login');
     const isOnLoginPage = window.location.pathname === '/login';
 
-    // Only auto-redirect on 401 if: not on login page AND not the login request itself
-    if (status === 401 && !isLoginEndpoint && !isOnLoginPage) {
+    // Only auto-redirect on 401 if: not the login request itself
+    if (status === 401 && !isLoginEndpoint) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

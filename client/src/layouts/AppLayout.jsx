@@ -368,7 +368,7 @@ export default function AppLayout({ children }) {
       </header>
 
       {/* Main Layout Body */}
-      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+      <div style={{ display: 'flex', flex: 1, position: 'relative', minHeight: 'calc(100vh - 105px)' }}>
         
         {/* Sidebar Overlay on Mobile */}
         {sidebarOpen && (
@@ -378,7 +378,7 @@ export default function AppLayout({ children }) {
           />
         )}
 
-        {/* Left Role Navigation Sidebar */}
+        {/* Left Role Navigation Sidebar (Stable & Sticky) */}
         <aside
           style={{
             width: '260px',
@@ -389,10 +389,9 @@ export default function AppLayout({ children }) {
             flexDirection: 'column',
             gap: '4px',
             flexShrink: 0,
-            zIndex: 1300,
             ...(sidebarOpen
-              ? { position: 'fixed', top: 0, bottom: 0, left: 0, boxShadow: '4px 0 20px rgba(0,0,0,0.2)' }
-              : {})
+              ? { position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 1300, boxShadow: '4px 0 20px rgba(0,0,0,0.2)' }
+              : { position: 'sticky', top: '105px', height: 'calc(100vh - 105px)', overflowY: 'auto', zIndex: 100 })
           }}
           className={sidebarOpen ? '' : 'hide-on-mobile-sidebar'}
         >
@@ -403,7 +402,18 @@ export default function AppLayout({ children }) {
             </div>
           )}
 
-          <div style={{ padding: '6px 10px', fontSize: '0.72rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div style={{
+            padding: '8px 10px',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            color: '#b45309',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            background: '#fffbeb',
+            borderRadius: '6px',
+            border: '1px solid #fde68a',
+            marginBottom: '8px'
+          }}>
             {ROLE_TITLES[roleKey]}
           </div>
 
@@ -419,7 +429,7 @@ export default function AppLayout({ children }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
-                    padding: '8px 12px',
+                    padding: '9px 12px',
                     borderRadius: '6px',
                     textDecoration: 'none',
                     fontSize: '0.84rem',
@@ -427,7 +437,7 @@ export default function AppLayout({ children }) {
                     color: isActive ? '#0b1d3a' : '#475569',
                     background: isActive ? '#f0f4f9' : 'transparent',
                     borderLeft: isActive ? '3px solid #0b1d3a' : '3px solid transparent',
-                    transition: 'all 0.15s'
+                    transition: 'all 0.15s ease'
                   }}
                 >
                   <span style={{ fontSize: '1.05rem', width: '20px', textAlign: 'center' }}>{item.icon}</span>
@@ -447,7 +457,7 @@ export default function AppLayout({ children }) {
                 width: '100%',
                 padding: '8px 12px',
                 borderRadius: '6px',
-                border: 'none',
+                border: '1px solid #fecaca',
                 background: '#fef2f2',
                 color: '#dc2626',
                 fontSize: '0.82rem',
@@ -462,7 +472,7 @@ export default function AppLayout({ children }) {
         </aside>
 
         {/* Content Area */}
-        <main style={{ flex: 1, padding: '16px', overflowY: 'auto', minWidth: 0 }}>
+        <main style={{ flex: 1, padding: '20px 24px', overflowY: 'auto', minWidth: 0 }}>
           {children}
         </main>
       </div>

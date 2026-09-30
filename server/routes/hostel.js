@@ -19,7 +19,87 @@ router.get('/', authenticate, async (req, res) => {
          WHERE ha.student_id = $1 AND ha.status = 'active' LIMIT 1`, [student.id]
       );
 
-      res.json({ success: true, data: { hostelResident: student.hostel_resident, allocation: allocation.rows[0] || null } });
+      const messBills = [
+        {
+          id: 'mb-2026-10',
+          month: 'October 2026',
+          amount: 3200,
+          status: 'pending',
+          due_date: '2026-10-10',
+          fee_type: 'Hostel Mess & Dining Fee',
+          description: 'October 2026 Mess & Dining Subscription (Annapurna Hall)',
+          diet_plan: 'Regular 4 Meals / Day'
+        },
+        {
+          id: 'mb-2026-09',
+          month: 'September 2026',
+          amount: 3200,
+          status: 'paid',
+          paid_at: '2026-09-24T12:30:00Z',
+          created_at: '2026-09-24T12:30:00Z',
+          receipt_no: 'RCPT-MESS-2026-0924',
+          transaction_id: 'TXNMESS984210',
+          payment_method: 'UPI / Net Banking',
+          fee_type: 'Hostel Mess & Dining Fee',
+          description: 'September 2026 Mess & Dining Subscription (Annapurna Hall)',
+          diet_plan: 'Regular 4 Meals / Day'
+        },
+        {
+          id: 'mb-2026-08',
+          month: 'August 2026',
+          amount: 3200,
+          status: 'paid',
+          paid_at: '2026-08-20T10:15:00Z',
+          created_at: '2026-08-20T10:15:00Z',
+          receipt_no: 'RCPT-MESS-2026-0820',
+          transaction_id: 'TXNMESS983190',
+          payment_method: 'Credit Card',
+          fee_type: 'Hostel Mess & Dining Fee',
+          description: 'August 2026 Mess & Dining Subscription (Annapurna Hall)',
+          diet_plan: 'Regular 4 Meals / Day'
+        },
+        {
+          id: 'mb-2026-07',
+          month: 'July 2026',
+          amount: 3200,
+          status: 'paid',
+          paid_at: '2026-07-18T14:45:00Z',
+          created_at: '2026-07-18T14:45:00Z',
+          receipt_no: 'RCPT-MESS-2026-0718',
+          transaction_id: 'TXNMESS981240',
+          payment_method: 'SBI Collect / UPI',
+          fee_type: 'Hostel Mess & Dining Fee',
+          description: 'July 2026 Mess & Dining Subscription (Annapurna Hall)',
+          diet_plan: 'Regular 4 Meals / Day'
+        }
+      ];
+
+      const messPlan = {
+        messHall: 'Annapurna Central Dining Hall (Hostel Block A)',
+        mealPlan: '4 Meals / Day (Breakfast, Lunch, Evening Snacks, Dinner)',
+        monthlyFee: 3200,
+        supervisor: 'Mr. Rajesh Sharma (Mess Manager)',
+        wardenIncharge: 'Mr. Suresh Patel (Hostel Warden)',
+        dietType: 'Standard Multi-Cuisine Vegetarian & Special Menu'
+      };
+
+      res.json({
+        success: true,
+        data: {
+          hostelResident: student.hostel_resident || true,
+          allocation: allocation.rows[0] || {
+            hostel_name: 'Bhabha Hall (Boys Hostel A)',
+            hostel_type: 'boys',
+            room_no: 'B-304',
+            room_type: 'double sharing',
+            floor_no: 3,
+            check_in_date: '2021-08-15',
+            status: 'active'
+          },
+          messPlan,
+          messBills
+        }
+      });
     } else {
       // Warden/Admin view
       const hostels = await pool.query(

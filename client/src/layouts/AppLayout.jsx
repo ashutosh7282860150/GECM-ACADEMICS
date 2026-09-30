@@ -244,14 +244,31 @@ export default function AppLayout({ children }) {
             </NavLink>
           </div>
 
-          {/* Top Institutional Nav Links */}
-          <nav className="gov-nav-desktop" style={{ gap: '14px' }}>
-            <NavLink to={getDashboardRoute()} style={{ fontWeight: 600 }}>Dashboard</NavLink>
-            <NavLink to="/services" style={{ fontWeight: 600 }}>Services</NavLink>
-            <NavLink to="/notices" style={{ fontWeight: 600 }}>Notices</NavLink>
-            <NavLink to="/departments" style={{ fontWeight: 600 }}>Departments</NavLink>
-            <NavLink to="/about" style={{ fontWeight: 600 }}>About</NavLink>
-            <NavLink to={getProfileRoute()} style={{ fontWeight: 600 }}>Profile</NavLink>
+          {/* Top User Controls & Actions (Role Specific Portal Only) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* User Profile Chip */}
+            <NavLink
+              to={getProfileRoute()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 12px',
+                borderRadius: '999px',
+                background: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                textDecoration: 'none',
+                color: '#0b1d3a',
+                fontSize: '0.84rem',
+                fontWeight: 600
+              }}
+              title="View Profile"
+            >
+              <span style={{ fontSize: '0.95rem' }}>
+                {user?.role === 'student' ? '🎓' : user?.role === 'faculty' || user?.role === 'hod' ? '👨‍🏫' : '🏛️'}
+              </span>
+              <span>{user?.name || 'My Profile'}</span>
+            </NavLink>
 
             {/* Notifications Dropdown */}
             <div style={{ position: 'relative' }} ref={notifRef}>
@@ -337,7 +354,7 @@ export default function AppLayout({ children }) {
             >
               🚪 Logout
             </button>
-          </nav>
+          </div>
         </div>
 
         {/* Role Bar Header */}
@@ -393,35 +410,6 @@ export default function AppLayout({ children }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', padding: '0 6px' }}>
               <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0b1d3a' }}>Menu Navigation</span>
               <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-            </div>
-          )}
-
-          {/* Top Institutional Links on Mobile Drawer */}
-          {sidebarOpen && (
-            <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '10px' }}>
-              <div style={{ padding: '4px 10px', fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Campus Portal
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginTop: '4px' }}>
-                <NavLink to={getDashboardRoute()} onClick={() => setSidebarOpen(false)} style={{ padding: '6px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600, color: '#0b1d3a', textDecoration: 'none', background: '#f8fafc' }}>
-                  🏠 Dashboard
-                </NavLink>
-                <NavLink to="/services" onClick={() => setSidebarOpen(false)} style={{ padding: '6px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600, color: '#0b1d3a', textDecoration: 'none', background: '#f8fafc' }}>
-                  🏛️ Services
-                </NavLink>
-                <NavLink to="/notices" onClick={() => setSidebarOpen(false)} style={{ padding: '6px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600, color: '#0b1d3a', textDecoration: 'none', background: '#f8fafc' }}>
-                  📢 Notices
-                </NavLink>
-                <NavLink to="/departments" onClick={() => setSidebarOpen(false)} style={{ padding: '6px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600, color: '#0b1d3a', textDecoration: 'none', background: '#f8fafc' }}>
-                  🏢 Branches
-                </NavLink>
-                <NavLink to="/about" onClick={() => setSidebarOpen(false)} style={{ padding: '6px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600, color: '#0b1d3a', textDecoration: 'none', background: '#f8fafc' }}>
-                  ℹ️ About
-                </NavLink>
-                <NavLink to={getProfileRoute()} onClick={() => setSidebarOpen(false)} style={{ padding: '6px 10px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 600, color: '#0b1d3a', textDecoration: 'none', background: '#f8fafc' }}>
-                  👤 Profile
-                </NavLink>
-              </div>
             </div>
           )}
 

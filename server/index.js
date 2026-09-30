@@ -16,7 +16,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(compression());
 app.use(morgan('combined'));
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: true, // Allow all origins (localhost, Vercel deployments, mobile devices)
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -137,13 +137,13 @@ app.use((req, res) => {
 });
 
 // =============================================
-// START SERVER
-// =============================================
-app.listen(PORT, () => {
-  console.log('\n🚀 SmartCampus ERP Server Started');
-  console.log(`📡 API: http://localhost:${PORT}/api`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('─'.repeat(50));
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log('\n🚀 SmartCampus ERP Server Started');
+    console.log(`📡 API: http://localhost:${PORT}/api`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log('─'.repeat(50));
+  });
+}
 
 module.exports = app;

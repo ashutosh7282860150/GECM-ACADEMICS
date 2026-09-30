@@ -462,6 +462,53 @@ const query = async (text, params = []) => {
     return { rows: [], rowCount: 0 };
   }
 
+  // INSERT INTO payments
+  if (cleanSql.includes('insert into payments')) {
+    const feeId = params[0];
+    const studentId = params[1];
+    const amount = params[2];
+    const paymentMethod = params[3];
+    const transactionId = params[4];
+    const receiptNo = params[5] || params[6] || ('RCPT-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000));
+    const fee = mockStore.fees.find(f => f.id === feeId);
+    const student = mockStore.students.find(s => s.id === studentId || s.user_id === studentId) || mockStore.students[0];
+    const dept = mockStore.departments.find(d => d.id === student?.department_id);
+
+    const paymentObj = {
+      id: 'p_' + Date.now(),
+      fee_id: feeId,
+      student_id: studentId,
+      amount: parseFloat(amount) || fee?.amount || 25000,
+      payment_method: paymentMethod || 'online',
+      transaction_id: transactionId,
+      status: 'completed',
+      receipt_no: receiptNo,
+      created_at: new Date(),
+      payment_date: new Date(),
+      fee_type: fee?.fee_type || 'Tuition Fee',
+      description: fee?.description || 'Semester Fee Payment',
+      student_name: student?.name || 'Arjun Patel',
+      enrollment_no: student?.enrollment_no || 'CSE2021001',
+      department_name: dept?.name || 'Computer Science & Engineering',
+      semester: fee?.semester || 7,
+      academic_year: fee?.academic_year || '2024-25'
+    };
+    mockStore.payments.unshift(paymentObj);
+    return { rows: [paymentObj], rowCount: 1 };
+  }
+
+  // UPDATE fees (Mark Paid)
+  if (cleanSql.includes('update fees set status =') || cleanSql.includes("update fees set status = 'paid'")) {
+    const feeId = params[params.length - 1];
+    const fee = mockStore.fees.find(f => f.id === feeId);
+    if (fee) {
+      fee.status = 'paid';
+      fee.updated_at = new Date();
+      return { rows: [fee], rowCount: 1 };
+    }
+    return { rows: [], rowCount: 1 };
+  }
+
   // UPDATE / DEFAULT EMPTY RESULT
   return { rows: [], rowCount: 0 };
 };

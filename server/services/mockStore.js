@@ -70,8 +70,8 @@ const fees = [
 ];
 
 const payments = [
-  { id: 'p1', fee_id: 'fe1', student_id: 's10', amount: 45000.00, payment_method: 'UPI / Online Banking', transaction_id: 'TXN9823471023', status: 'completed', payment_date: '2024-09-15T10:30:00Z', fee_type: 'Tuition Fee', student_name: 'Arjun Patel',  enrollment_no: 'CSE2021001' },
-  { id: 'p2', fee_id: 'fe4', student_id: 's11', amount: 45000.00, payment_method: 'Credit Card',         transaction_id: 'TXN9823471024', status: 'completed', payment_date: '2024-09-18T14:15:00Z', fee_type: 'Tuition Fee', student_name: 'Priya Sharma', enrollment_no: 'CSE2021002' }
+  { id: 'p1', fee_id: 'fe1', student_id: 's10', amount: 45000.00, payment_method: 'UPI / Online Banking', transaction_id: 'TXN9823471023', status: 'completed', payment_date: '2024-09-15T10:30:00Z', created_at: '2024-09-15T10:30:00Z', receipt_no: 'RCPT-2024-0892', fee_type: 'Tuition Fee', description: 'Semester 7 Tuition Fee', student_name: 'Arjun Patel',  enrollment_no: 'CSE2021001', department_name: 'Computer Science & Engineering', semester: 7, academic_year: '2024-25' },
+  { id: 'p2', fee_id: 'fe4', student_id: 's11', amount: 45000.00, payment_method: 'Credit Card',         transaction_id: 'TXN9823471024', status: 'completed', payment_date: '2024-09-18T14:15:00Z', created_at: '2024-09-18T14:15:00Z', receipt_no: 'RCPT-2024-0914', fee_type: 'Tuition Fee', description: 'Semester 7 Tuition Fee', student_name: 'Priya Sharma', enrollment_no: 'CSE2021002', department_name: 'Computer Science & Engineering', semester: 7, academic_year: '2024-25' }
 ];
 
 const attendance = [

@@ -80,7 +80,31 @@ router.post('/pay', authenticate, authorize('student'), async (req, res) => {
       res.json({
         success: true,
         message: 'Payment processed successfully!',
-        data: { transactionId, receiptNo, amount: fee.amount, feeType: fee.fee_type, paymentMethod }
+        data: {
+          transactionId,
+          transaction_id: transactionId,
+          receiptNo,
+          receipt_no: receiptNo,
+          amount: fee.amount,
+          feeType: fee.fee_type,
+          fee_type: fee.fee_type,
+          description: fee.description || `${fee.fee_type} (Semester ${fee.semester})`,
+          paymentMethod,
+          payment_method: paymentMethod,
+          studentName: req.user.name,
+          student_name: req.user.name,
+          enrollmentNo: req.user.enrollment_no,
+          enrollment_no: req.user.enrollment_no,
+          departmentName: req.user.department_name || 'Computer Science & Engineering',
+          department_name: req.user.department_name || 'Computer Science & Engineering',
+          semester: fee.semester || 7,
+          academicYear: fee.academic_year || '2024-25',
+          academic_year: fee.academic_year || '2024-25',
+          paidAt: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          feeId,
+          status: 'completed'
+        }
       });
     } else {
       await pool.query(

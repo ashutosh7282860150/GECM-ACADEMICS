@@ -1,14 +1,34 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import FeeReceiptPdfModal from '../common/FeeReceiptPdfModal';
 
 export default function AdminAccountsPage() {
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [transactions] = useState([
-    { id: 'TXN-98421', student: 'Arjun Patel', roll: 'CSE2021001', feeType: 'Semester 7 Tuition Fee', amount: '₹14,500', status: 'PAID', date: '25 SEP 2026' },
-    { id: 'TXN-98420', student: 'Priya Sharma', roll: 'CSE2021002', feeType: 'Hostel & Mess Fee', amount: '₹18,000', status: 'PAID', date: '24 SEP 2026' },
-    { id: 'TXN-98419', student: 'Rahul Verma', roll: 'CSE2021003', feeType: 'Examination Fee', amount: '₹1,500', status: 'PENDING', date: '22 SEP 2026' },
-    { id: 'TXN-98418', student: 'Ananya Gupta', roll: 'CSE2021004', feeType: 'Semester 7 Tuition Fee', amount: '₹14,500', status: 'PAID', date: '21 SEP 2026' },
-    { id: 'TXN-98417', student: 'Amit Kumar', roll: 'ECE2021005', feeType: 'Library Overdue Fine', amount: '₹120', status: 'PAID', date: '20 SEP 2026' }
+    { id: 'TXN-98421', receiptNo: 'RCPT-2026-9842', student: 'Arjun Patel', roll: 'CSE2021001', dept: 'Computer Science & Engineering', feeType: 'Semester 7 Tuition Fee', amount: '14500', status: 'PAID', date: '25 SEP 2026' },
+    { id: 'TXN-98420', receiptNo: 'RCPT-2026-9840', student: 'Priya Sharma', roll: 'CSE2021002', dept: 'Computer Science & Engineering', feeType: 'Hostel & Mess Fee', amount: '18000', status: 'PAID', date: '24 SEP 2026' },
+    { id: 'TXN-98419', receiptNo: 'RCPT-2026-9819', student: 'Rahul Verma', roll: 'CSE2021003', dept: 'Computer Science & Engineering', feeType: 'Examination Fee', amount: '1500', status: 'PENDING', date: '22 SEP 2026' },
+    { id: 'TXN-98418', receiptNo: 'RCPT-2026-9818', student: 'Ananya Gupta', roll: 'CSE2021004', dept: 'Computer Science & Engineering', feeType: 'Semester 7 Tuition Fee', amount: '14500', status: 'PAID', date: '21 SEP 2026' },
+    { id: 'TXN-98417', receiptNo: 'RCPT-2026-9817', student: 'Amit Kumar', roll: 'ECE2021005', dept: 'Electronics & Communication', feeType: 'Library Overdue Fine', amount: '120', status: 'PAID', date: '20 SEP 2026' }
   ]);
+
+  const handleOpenReceipt = (t) => {
+    setSelectedReceipt({
+      receipt_no: t.receiptNo,
+      transaction_id: t.id,
+      amount: parseFloat(t.amount) || 14500,
+      fee_type: t.feeType,
+      description: `${t.feeType} Payment Settlement`,
+      payment_method: 'SBI Collect / Online Banking',
+      created_at: new Date('2026-09-25T10:00:00Z').toISOString(),
+      student_name: t.student,
+      enrollment_no: t.roll,
+      department_name: t.dept,
+      semester: 7,
+      academic_year: '2024-25',
+      status: 'completed'
+    });
+  };
 
   return (
     <div style={{ padding: '20px', maxWidth: '1100px', margin: '0 auto' }}>
@@ -70,6 +90,7 @@ export default function AdminAccountsPage() {
                 <th style={{ padding: '10px 12px' }}>Amount</th>
                 <th style={{ padding: '10px 12px', textAlign: 'center' }}>Date</th>
                 <th style={{ padding: '10px 12px', textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '10px 12px', textAlign: 'center' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -81,7 +102,7 @@ export default function AdminAccountsPage() {
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{t.roll}</div>
                   </td>
                   <td style={{ padding: '10px 12px', color: '#475569' }}>{t.feeType}</td>
-                  <td style={{ padding: '10px 12px', fontWeight: 800, color: '#0b1d3a' }}>{t.amount}</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 800, color: '#0b1d3a' }}>₹{t.amount}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'center', color: '#64748b' }}>{t.date}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                     <span style={{
@@ -95,12 +116,31 @@ export default function AdminAccountsPage() {
                       {t.status}
                     </span>
                   </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                    {t.status === 'PAID' && (
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => handleOpenReceipt(t)}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 700 }}
+                      >
+                        📄 Receipt PDF
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Fee Receipt PDF Modal */}
+      {selectedReceipt && (
+        <FeeReceiptPdfModal
+          payment={selectedReceipt}
+          onClose={() => setSelectedReceipt(null)}
+        />
+      )}
     </div>
   );
 }

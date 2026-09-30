@@ -29,6 +29,7 @@ export default function PublicVerifyPage() {
     // 2. Default fallback verification object with rich institutional details
     const isGatePass = refParam.toUpperCase().includes('GP') || searchParams.get('type') === 'gatepass';
     const isNoDues = refParam.toUpperCase().includes('ND') || searchParams.get('type') === 'nodues';
+    const isReceipt = refParam.toUpperCase().includes('RCPT') || refParam.toUpperCase().includes('TXN') || searchParams.get('type') === 'receipt' || searchParams.get('type') === 'fee';
 
     setVerificationData({
       refId: refParam.toUpperCase(),
@@ -39,20 +40,24 @@ export default function PublicVerifyPage() {
         ? 'Digital Campus Exit Gate Pass'
         : isNoDues
         ? 'Institutional No-Dues Clearance Certificate'
+        : isReceipt
+        ? 'Official Student Fee Payment E-Receipt'
         : 'Official Academic Sanction Order & Certificate',
       studentName: searchParams.get('student') || 'Arjun Patel',
       enrollmentNo: searchParams.get('roll') || 'CSE2021001',
       department: searchParams.get('dept') || 'Computer Science & Engineering',
       semester: searchParams.get('sem') || 'Semester 7',
       status: 'AUTHENTIC & VERIFIED ✅',
-      approvalStatus: 'APPROVED & ISSUED',
+      approvalStatus: isReceipt ? 'PAID & SETTLED' : 'APPROVED & ISSUED',
       approvingAuthority: isGatePass
         ? 'Mr. Suresh Patel (Hostel Warden & Security Incharge)'
         : isNoDues
         ? 'Multi-Department Clearance Committee (Administrator, HOD CSE, Warden, Fee Cell, Faculty & Library)'
+        : isReceipt
+        ? 'Accounts & Financial Management Cell (GECM Madhubani)'
         : 'Prof. Anita Sharma (Head of Department / Dean)',
       sanctionDate: searchParams.get('date') || new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      destinationOrPurpose: searchParams.get('purpose') || (isGatePass ? 'Campus Outpass / Authorized Visit' : isNoDues ? 'Complete Multi-Department No-Dues Clearance' : 'Academic Sanction & Institutional Clearance'),
+      destinationOrPurpose: searchParams.get('purpose') || (isGatePass ? 'Campus Outpass / Authorized Visit' : isNoDues ? 'Complete Multi-Department No-Dues Clearance' : isReceipt ? `Institutional Fee Settlement (${searchParams.get('amount') ? '₹' + searchParams.get('amount') : 'Paid'})` : 'Academic Sanction & Institutional Clearance'),
       validityPeriod: isGatePass ? 'Valid for authorized departure & return' : 'Permanent Verified Institutional Record',
       digitalHash: 'GECM-SECURE-SHA256-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
       verifiedAt: new Date().toISOString()

@@ -9,6 +9,7 @@ import PublicNoticesPage from './pages/PublicNoticesPage';
 import PublicServicesPage from './pages/PublicServicesPage';
 import PublicAcademicsPage from './pages/PublicAcademicsPage';
 import PublicAboutPage from './pages/PublicAboutPage';
+import PublicVerifyPage from './pages/PublicVerifyPage';
 import DepartmentsListPage from './pages/departments/DepartmentsListPage';
 import DepartmentDetailPage from './pages/departments/DepartmentDetailPage';
 
@@ -109,6 +110,8 @@ const AppRoutes = () => (
     <Route path="/services" element={<PublicServicesPage />} />
     <Route path="/academics" element={<PublicAcademicsPage />} />
     <Route path="/about" element={<PublicAboutPage />} />
+    <Route path="/verify" element={<PublicVerifyPage />} />
+    <Route path="/verify/:certId" element={<PublicVerifyPage />} />
     <Route path="/departments" element={<DepartmentsListPage />} />
     <Route path="/departments/:deptId" element={<DepartmentDetailPage />} />
 

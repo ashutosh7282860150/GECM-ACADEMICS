@@ -182,14 +182,9 @@ export default function GatePassPage() {
               const isApproved = gp.status?.toLowerCase() === 'approved';
               const isPending = gp.status?.toLowerCase() === 'pending';
               const isRejected = gp.status?.toLowerCase() === 'rejected';
-              const qrPayload = gp.qr_data || (typeof gp.qr_code_data === 'string' ? gp.qr_code_data : JSON.stringify({
-                id: gp.id,
-                passNumber: gp.pass_number || 'GP-VERIFIED',
-                studentName: gp.student_name || 'Arjun Patel',
-                enrollment: gp.enrollment_no || 'CSE2021001',
-                destination: gp.destination,
-                status: 'approved'
-              }));
+              const verifyBaseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gecm.ac.in';
+              const passNo = gp.pass_number || 'GP-VERIFIED';
+              const qrPayload = `${verifyBaseUrl}/verify/${passNo}?type=gatepass&student=${encodeURIComponent(gp.student_name || 'Arjun Patel')}&roll=${encodeURIComponent(gp.enrollment_no || 'CSE2021001')}&purpose=${encodeURIComponent(gp.destination || 'Campus Outpass')}&date=${encodeURIComponent(formatDate(gp.from_datetime || gp.out_date_time, 'dd MMM yyyy'))}&status=APPROVED_EXIT_CLEARANCE`;
 
               return (
                 <div
@@ -413,14 +408,11 @@ export default function GatePassPage() {
                 <img src={passModal.qr_code} alt="Gate Pass QR" style={{ width: '180px', height: '180px', objectFit: 'contain' }} />
               ) : (
                 <QRCodeCanvas
-                  value={passModal.qr_data || JSON.stringify({
-                    id: passModal.id,
-                    passNumber: passModal.pass_number || 'GP-VERIFIED',
-                    studentName: passModal.student_name || 'Arjun Patel',
-                    enrollment: passModal.enrollment_no || 'CSE2021001',
-                    destination: passModal.destination,
-                    status: 'approved'
-                  })}
+                  value={
+                    passModal.qr_data && passModal.qr_data.startsWith('http')
+                      ? passModal.qr_data
+                      : `${typeof window !== 'undefined' ? window.location.origin : 'https://gecm.ac.in'}/verify/${passModal.pass_number || 'GP-VERIFIED'}?type=gatepass&student=${encodeURIComponent(passModal.student_name || 'Arjun Patel')}&roll=${encodeURIComponent(passModal.enrollment_no || 'CSE2021001')}&purpose=${encodeURIComponent(passModal.destination || 'Outpass')}&date=${encodeURIComponent(formatDate(passModal.from_datetime || passModal.out_date_time, 'dd MMM yyyy'))}&status=APPROVED_EXIT_CLEARANCE`
+                  }
                   size={180}
                   level="H"
                   includeMargin={true}

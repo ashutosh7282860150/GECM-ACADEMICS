@@ -21,19 +21,9 @@ export default function ApplicationApprovalPdfModal({ app, onClose }) {
   const approvedDate = app.reviewed_at || app.updated_at || new Date().toISOString();
   const reviewerName = app.reviewed_by_name || 'Prof. Anita Sharma (HOD / Dean Academics)';
 
-  // QR verification payload
-  const qrVerificationPayload = JSON.stringify({
-    institution: 'Government Engineering College Madhubani (GECM)',
-    verificationUrl: `https://gecm.ac.in/verify/${appId}`,
-    applicationId: appId,
-    type: typeName,
-    student: studentName,
-    rollNo: enrollmentNo,
-    status: 'APPROVED & ISSUED',
-    approvedOn: formatDate(approvedDate, 'dd MMM yyyy'),
-    authority: reviewerName,
-    seal: 'GECM-GOV-BIHAR-SECURE-STAMP'
-  });
+  // Live Scannable QR verification URL with embedded parameters
+  const verifyBaseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://gecm.ac.in';
+  const qrVerificationPayload = `${verifyBaseUrl}/verify/${appId}?student=${encodeURIComponent(studentName)}&roll=${encodeURIComponent(enrollmentNo)}&dept=${encodeURIComponent(departmentName)}&type=${encodeURIComponent(typeName)}&date=${encodeURIComponent(formatDate(approvedDate, 'dd MMM yyyy'))}&auth=${encodeURIComponent(reviewerName)}&status=VERIFIED_APPROVED`;
 
   return (
     <div className="modal-overlay" onClick={onClose} style={{ zIndex: 9999, background: 'rgba(11, 29, 58, 0.75)', backdropFilter: 'blur(4px)' }}>

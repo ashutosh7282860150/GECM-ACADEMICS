@@ -223,7 +223,7 @@ export default function NoDuesPage() {
                 <div style={{ fontSize: '48px', marginBottom: '8px' }}>🏆</div>
                 <h3 style={{ color: 'var(--success)', marginBottom: '8px' }}>Official No-Dues Clearance Certificate</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                  This certifies that {detailModal.student_name || 'Arjun Patel'} has successfully cleared all clearance gates across Hostel, Library, Accounts, and Academic Administration.
+                  This certifies that {detailModal.student_name || 'Arjun Patel'} has successfully cleared all clearance gates across Administrator, HOD CSE, Hostel Warden, Fee Cell, All Faculty, and Central Library.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
                   <QRCodeCanvas value={JSON.stringify({ type: 'no_dues_cert', id: detailModal.id, student: detailModal.enrollment_no || 'CSE2021001', status: 'VERIFIED_CLEAR' })} size={120} level="H" />

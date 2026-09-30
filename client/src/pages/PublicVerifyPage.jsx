@@ -47,11 +47,13 @@ export default function PublicVerifyPage() {
       status: 'AUTHENTIC & VERIFIED ✅',
       approvalStatus: 'APPROVED & ISSUED',
       approvingAuthority: isGatePass
-        ? 'Mr. Suresh Patel (Hostel Warden)'
+        ? 'Mr. Suresh Patel (Hostel Warden & Security Incharge)'
+        : isNoDues
+        ? 'Multi-Department Clearance Committee (Administrator, HOD CSE, Warden, Fee Cell, Faculty & Library)'
         : 'Prof. Anita Sharma (Head of Department / Dean)',
       sanctionDate: searchParams.get('date') || new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      destinationOrPurpose: searchParams.get('purpose') || (isGatePass ? 'Campus Outpass / Authorized Visit' : 'Academic Sanction & Institutional Clearance'),
-      validityPeriod: isGatePass ? 'Valid for authorized single gate departure & return' : 'Permanent Academic Record',
+      destinationOrPurpose: searchParams.get('purpose') || (isGatePass ? 'Campus Outpass / Authorized Visit' : isNoDues ? 'Complete Multi-Department No-Dues Clearance' : 'Academic Sanction & Institutional Clearance'),
+      validityPeriod: isGatePass ? 'Valid for authorized departure & return' : 'Permanent Verified Institutional Record',
       digitalHash: 'GECM-SECURE-SHA256-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
       verifiedAt: new Date().toISOString()
     });

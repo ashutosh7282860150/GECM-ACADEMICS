@@ -3,18 +3,40 @@ const mockStore = require('../services/mockStore');
 const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
-let poolConnected = false;
+const connectionString =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.NEON_DATABASE_URL ||
+  null;
 
-const realPool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME || 'smartcampus_erp',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 1500,
-});
+const isRemoteDb = Boolean(
+  connectionString ||
+  process.env.DB_SSL === 'true' ||
+  (process.env.DB_HOST && process.env.DB_HOST !== 'localhost' && process.env.DB_HOST !== '127.0.0.1')
+);
+
+const poolConfig = connectionString
+  ? {
+      connectionString,
+      ssl: isRemoteDb ? { rejectUnauthorized: false } : false,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    }
+  : {
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 5432,
+      database: process.env.DB_NAME || 'smartcampus_erp',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'postgres',
+      ssl: isRemoteDb ? { rejectUnauthorized: false } : false,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    };
+
+const realPool = new Pool(poolConfig);
+let poolConnected = false;
 
 realPool.on('connect', () => {
   poolConnected = true;
@@ -23,15 +45,17 @@ realPool.on('connect', () => {
 
 realPool.on('error', (err) => {
   poolConnected = false;
-  console.warn('⚠️ Database connection lost, fallback to in-memory store.');
+  console.warn('⚠️ Database connection error, fallback to in-memory store:', err.message);
 });
 
 // Smart query wrapper with mock fallback
 const query = async (text, params = []) => {
-  if (poolConnected) {
-    try {
-      return await realPool.query(text, params);
-    } catch (err) {
+  try {
+    const res = await realPool.query(text, params);
+    poolConnected = true;
+    return res;
+  } catch (err) {
+    if (poolConnected || connectionString) {
       console.warn('⚠️ Postgres query failed, executing with mock store fallback:', err.message);
     }
   }
@@ -414,5 +438,7 @@ realPool.connect((err, client, release) => {
 
 module.exports = {
   query,
-  on: (...args) => realPool.on(...args)
+  end: () => realPool.end(),
+  on: (...args) => realPool.on(...args),
+  realPool
 };

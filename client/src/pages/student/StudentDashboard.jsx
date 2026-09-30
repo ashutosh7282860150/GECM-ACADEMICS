@@ -45,14 +45,12 @@ export default function StudentDashboard() {
   const STUDENT_QUICK_SERVICES = [
     { icon: '👤', title: 'Student Profile', desc: 'Personal & Academic Bio', route: '/student/profile' },
     { icon: '📑', title: 'Course Registration', desc: 'Semester 7 Subjects', route: '/student/course-registration' },
-    { icon: '📊', title: 'Attendance', desc: '88% Overall Compliance', route: '/student/attendance' },
-    { icon: '📝', title: 'Examination', desc: 'Hall Tickets & Schedule', route: '/student/examination' },
-    { icon: '🏆', title: 'Results & Grades', desc: 'SGPA 8.84 • CGPA 8.62', route: '/student/results' },
     { icon: '💳', title: 'Fees & Receipts', desc: 'Tuition & Mess Ledger', route: '/student/fees' },
     { icon: '🚪', title: 'Digital Gate Pass', desc: 'Campus Outing Pass', route: '/student/gate-pass' },
     { icon: '✅', title: 'No-Dues Clearance', desc: 'Institutional Clearance', route: '/student/no-dues' },
-    { icon: '📚', title: 'Assignments', desc: 'Submissions & Deadlines', route: '/student/assignments' },
-    { icon: '📅', title: 'Time Table', desc: 'Weekly Lectures & Labs', route: '/student/timetable' }
+    { icon: '🏨', title: 'Hostel Services', desc: 'Room & Resident Details', route: '/student/hostel' },
+    { icon: '📄', title: 'Apply Services', desc: 'Certificates & Requests', route: '/student/applications' },
+    { icon: '📋', title: 'My Applications', desc: 'Track Application Status', route: '/student/my-applications' },
   ];
 
   return (
@@ -90,17 +88,17 @@ export default function StudentDashboard() {
       {/* ── 2. QUICK STATISTICS ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
         
-        {/* Attendance Stat */}
+        {/* Clearance Status */}
         <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>Overall Attendance</span>
-            <span style={{ fontSize: '1.2rem' }}>📊</span>
+            <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>Clearance Status</span>
+            <span style={{ fontSize: '1.2rem' }}>✅</span>
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: attendance.percentage >= 75 ? '#16a34a' : '#dc2626', marginTop: '4px' }}>
-            {attendance.percentage}%
+          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: noDues?.overall_status === 'approved' ? '#16a34a' : '#b45309', marginTop: '6px' }}>
+            {noDues?.overall_status ? noDues.overall_status.toUpperCase() : 'IN PROGRESS'}
           </div>
-          <div style={{ fontSize: '0.75rem', color: attendance.percentage >= 75 ? '#16a34a' : '#dc2626', fontWeight: 700, marginTop: '2px' }}>
-            {attendance.percentage >= 75 ? '✅ Eligible for Exams (>75%)' : '⚠️ Short Attendance'}
+          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+            Institutional Clearance
           </div>
         </div>
 

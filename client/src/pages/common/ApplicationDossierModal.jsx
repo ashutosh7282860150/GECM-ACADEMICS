@@ -166,19 +166,19 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
             </div>
           )}
 
-          {/* Department Clearance Matrix for No Dues */}
-          {app.clearances && app.clearances.length > 0 && (
+          {/* Multi-Department Clearance Matrix for No Dues */}
+          {(app.type_code === 'GECM-ND' || (app.clearances && app.clearances.length > 0 && !['GECM-GP', 'GECM-LV', 'GECM-BF', 'GECM-CC'].includes(app.type_code))) && (
             <div style={{ background: 'var(--bg-3)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <h4 style={{ fontSize: '14px', margin: 0, color: 'var(--primary-light)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>✅</span> Real-Time Multi-Department Clearance Matrix
                 </h4>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                  {app.clearances.filter(c => c.status === 'APPROVED').length} / {app.clearances.length} Cleared
+                  {app.clearances ? app.clearances.filter(c => c.status === 'APPROVED').length : 0} / {app.clearances ? app.clearances.length : 6} Cleared
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                {app.clearances.map(c => {
+                {(app.clearances || []).map(c => {
                   let deptIcon = '🏢';
                   const dName = c.department.toLowerCase();
                   if (dName.includes('hostel') || dName.includes('warden')) deptIcon = '🏠';
@@ -188,8 +188,35 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
                   else if (dName.includes('library')) deptIcon = '📚';
                   else if (dName.includes('admin')) deptIcon = '🏛️';
 
+                  // Determine if the currently logged-in reviewer is authorized to clear this specific card
+                  let canClearCard = false;
+                  if (userRole === 'admin') {
+                    canClearCard = true; // Admin has institutional master clearance override
+                  } else if (userRole === 'warden' && (dName.includes('hostel') || dName.includes('warden'))) {
+                    canClearCard = true;
+                  } else if (userRole === 'accounts' && (dName.includes('account') || dName.includes('fee'))) {
+                    canClearCard = true;
+                  } else if (userRole === 'hod' && (dName.includes('hod') || dName.includes('department'))) {
+                    canClearCard = true;
+                  } else if (userRole === 'faculty' && (dName.includes('faculty') || dName.includes('lab'))) {
+                    canClearCard = true;
+                  }
+
                   return (
-                    <div key={c.department} style={{ padding: '14px', background: 'var(--surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
+                    <div
+                      key={c.department}
+                      style={{
+                        padding: '14px',
+                        background: canClearCard ? 'var(--surface)' : 'var(--bg-2)',
+                        borderRadius: 'var(--radius-sm)',
+                        border: canClearCard ? '1.5px solid var(--primary-light)' : '1px solid var(--border)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                        boxShadow: canClearCard ? '0 2px 6px rgba(0,0,0,0.06)' : 'none'
+                      }}
+                    >
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                           <span style={{ fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -212,25 +239,32 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
                         )}
                       </div>
 
+                      {/* Only render active action buttons for the authorized department reviewer */}
                       {isReviewer && onClearanceUpdate && app.current_status !== 'APPROVED' && app.current_status !== 'REJECTED' && (
-                        <div style={{ display: 'flex', gap: '6px', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed var(--border)' }}>
-                          <button
-                            type="button"
-                            className="btn btn-success btn-sm"
-                            style={{ flex: 1, padding: '4px 8px', fontSize: '11px', fontWeight: 700 }}
-                            onClick={() => onClearanceUpdate(app.id, c.department, 'APPROVED')}
-                          >
-                            ✓ Approve
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            style={{ flex: 1, padding: '4px 8px', fontSize: '11px', fontWeight: 700 }}
-                            onClick={() => onClearanceUpdate(app.id, c.department, 'REJECTED')}
-                          >
-                            ✗ Reject
-                          </button>
-                        </div>
+                        canClearCard ? (
+                          <div style={{ display: 'flex', gap: '6px', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed var(--border)' }}>
+                            <button
+                              type="button"
+                              className="btn btn-success btn-sm"
+                              style={{ flex: 1, padding: '5px 8px', fontSize: '11px', fontWeight: 700 }}
+                              onClick={() => onClearanceUpdate(app.id, c.department, 'APPROVED')}
+                            >
+                              ✓ Approve
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              style={{ flex: 1, padding: '5px 8px', fontSize: '11px', fontWeight: 700 }}
+                              onClick={() => onClearanceUpdate(app.id, c.department, 'REJECTED')}
+                            >
+                              ✗ Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed var(--border)', fontStyle: 'italic' }}>
+                            🔒 Assigned to {c.department}
+                          </div>
+                        )
                       )}
                     </div>
                   );

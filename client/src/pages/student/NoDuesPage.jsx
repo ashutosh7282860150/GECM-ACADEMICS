@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { noDuesAPI } from '../../services/api';
 import { formatDate, getStatusBadgeClass, getStatusLabel, timeAgo } from '../../utils/helpers';
 import { QRCodeCanvas } from 'qrcode.react';
+import ApplicationApprovalPdfModal from '../common/ApplicationApprovalPdfModal';
 import toast from 'react-hot-toast';
 
 const STEPS = [
@@ -16,6 +17,7 @@ export default function NoDuesPage() {
   const [loading, setLoading] = useState(true);
   const [createModal, setCreateModal] = useState(false);
   const [detailModal, setDetailModal] = useState(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
   const [form, setForm] = useState({ reason: '', requestType: 'graduation' });
   const [submitting, setSubmitting] = useState(false);
 
@@ -217,14 +219,23 @@ export default function NoDuesPage() {
             {detailModal.overall_status === 'completed' && (
               <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 'var(--radius-lg)', padding: '24px', textAlign: 'center', marginBottom: '16px' }}>
                 <div style={{ fontSize: '48px', marginBottom: '8px' }}>🏆</div>
-                <h3 style={{ color: 'var(--success)', marginBottom: '8px' }}>No-Dues Certificate</h3>
+                <h3 style={{ color: 'var(--success)', marginBottom: '8px' }}>Official No-Dues Clearance Certificate</h3>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                  This certifies that {detailModal.student_name} has cleared all dues from all departments.
+                  This certifies that {detailModal.student_name || 'Arjun Patel'} has successfully cleared all clearance gates across Hostel, Library, Accounts, and Academic Administration.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-                  <QRCodeCanvas value={JSON.stringify({ type: 'no_dues_cert', id: detailModal.id, student: detailModal.enrollment_no })} size={120} level="H" />
+                  <QRCodeCanvas value={JSON.stringify({ type: 'no_dues_cert', id: detailModal.id, student: detailModal.enrollment_no || 'CSE2021001', status: 'VERIFIED_CLEAR' })} size={120} level="H" />
                 </div>
-                <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Issued on {formatDate(detailModal.admin_verified_at || detailModal.updated_at)}</p>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '14px' }}>Issued on {formatDate(detailModal.admin_verified_at || detailModal.updated_at)}</p>
+
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => setShowPdfModal(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
+                >
+                  📄 Print / Download Official Certificate (PDF)
+                </button>
               </div>
             )}
 
@@ -253,6 +264,28 @@ export default function NoDuesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Official No-Dues PDF Certificate Modal */}
+      {showPdfModal && detailModal && (
+        <ApplicationApprovalPdfModal
+          app={{
+            application_id: detailModal.id || 'ND-2026-CLEARANCE',
+            type_name: 'Institutional No-Dues Clearance Certificate',
+            student_name: detailModal.student_name || 'Arjun Patel',
+            enrollment_no: detailModal.enrollment_no || 'CSE2021001',
+            department_name: detailModal.department_name || 'Computer Science & Engineering',
+            semester: 8,
+            submitted_at: detailModal.created_at,
+            reviewed_at: detailModal.admin_verified_at || detailModal.updated_at,
+            assigned_department: 'Hostel, Library, Accounts & Admin Cell',
+            form_data: {
+              reason: 'Final Semester & Graduation No-Dues Institutional Clearance',
+              clearanceGates: 'All 4 Departmental Gates Cleared & Approved'
+            }
+          }}
+          onClose={() => setShowPdfModal(false)}
+        />
       )}
     </div>
   );

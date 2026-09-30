@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { applicationsAPI } from '../../services/api';
 import { formatDate, getStatusBadgeClass, getStatusLabel } from '../../utils/helpers';
 import ApplicationDossierModal from '../common/ApplicationDossierModal';
+import ApplicationApprovalPdfModal from '../common/ApplicationApprovalPdfModal';
 import toast from 'react-hot-toast';
 
 export default function MyApplicationsPage() {
@@ -9,6 +10,7 @@ export default function MyApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [activeDossier, setActiveDossier] = useState(null);
+  const [pdfModalApp, setPdfModalApp] = useState(null);
 
   // Correction Edit state
   const [correctionModal, setCorrectionModal] = useState(null);
@@ -110,10 +112,20 @@ export default function MyApplicationsPage() {
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '6px' }}>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         <button className="btn btn-outline btn-sm" onClick={() => setActiveDossier(app)}>
                           View Dossier 🔍
                         </button>
+                        {app.current_status === 'APPROVED' && (
+                          <button
+                            className="btn btn-success btn-sm"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}
+                            onClick={() => setPdfModalApp(app)}
+                            title="Download Verified Institutional PDF Certificate"
+                          >
+                            📄 Download PDF
+                          </button>
+                        )}
                         {app.current_status === 'NEEDS_CORRECTION' && (
                           <button className="btn btn-warning btn-sm" onClick={() => {
                             setCorrectionModal(app);
@@ -138,6 +150,14 @@ export default function MyApplicationsPage() {
           app={activeDossier}
           onClose={() => setActiveDossier(null)}
           userRole="student"
+        />
+      )}
+
+      {/* Official Approved PDF Certificate Modal */}
+      {pdfModalApp && (
+        <ApplicationApprovalPdfModal
+          app={pdfModalApp}
+          onClose={() => setPdfModalApp(null)}
         />
       )}
 

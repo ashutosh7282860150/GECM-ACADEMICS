@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatDate, getStatusBadgeClass, getStatusLabel } from '../../utils/helpers';
+import ApplicationApprovalPdfModal from './ApplicationApprovalPdfModal';
 import toast from 'react-hot-toast';
 
 export default function ApplicationDossierModal({ app, onClose, onReview, onClearanceUpdate, userRole }) {
@@ -8,6 +9,7 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
   const [rejectionReason, setRejectionReason] = useState('');
   const [correctionNote, setCorrectionNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   if (!app) return null;
 
@@ -60,6 +62,52 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Approved Official Certificate Banner */}
+          {app.current_status === 'APPROVED' && (
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                border: '2px solid #86efac',
+                padding: '16px 20px',
+                borderRadius: '8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '14px'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '1.3rem' }}>📜</span>
+                  <strong style={{ fontSize: '0.95rem', color: '#15803d' }}>
+                    Application Officially Approved &amp; Sanctioned
+                  </strong>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#166534', marginTop: '2px' }}>
+                  Your official GECM institutional certificate with digital QR verification code is generated and ready for print or download.
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowPdfModal(true)}
+                className="btn btn-success"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontWeight: 800,
+                  fontSize: '0.86rem',
+                  padding: '10px 18px',
+                  boxShadow: '0 4px 6px -1px rgba(22, 163, 74, 0.2)'
+                }}
+              >
+                📄 Generate &amp; Download PDF Certificate
+              </button>
+            </div>
+          )}
+
           {/* Student Profile Info */}
           <div style={{ background: 'var(--bg-3)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
             <h4 style={{ fontSize: '14px', marginBottom: '10px', color: 'var(--primary-light)' }}>👤 Student Profile</h4>
@@ -263,6 +311,13 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
           <button className="btn btn-outline w-full" onClick={onClose}>Close Dossier</button>
         </div>
       </div>
+
+      {showPdfModal && (
+        <ApplicationApprovalPdfModal
+          app={app}
+          onClose={() => setShowPdfModal(false)}
+        />
+      )}
     </div>
   );
 }

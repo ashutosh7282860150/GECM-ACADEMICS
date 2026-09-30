@@ -6,8 +6,14 @@ export default function WardenDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchWarden = () => {
     dashboardAPI.warden().then(res => setData(res.data.data)).catch(console.error).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchWarden();
+    const interval = setInterval(fetchWarden, 3500);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) return <div className="loading-page"><div className="spinner" /></div>;

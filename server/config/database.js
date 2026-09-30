@@ -39,6 +39,17 @@ const query = async (text, params = []) => {
   // MOCK STORE QUERY FALLBACK ENGINE
   const cleanSql = text.replace(/\s+/g, ' ').trim().toLowerCase();
   
+  // 0. SELECT users JOIN students
+  if (cleanSql.includes('from users') && cleanSql.includes('students') && cleanSql.includes('s.id = $1')) {
+    const studentId = params[0];
+    const st = mockStore.students.find(s => s.id === studentId || s.user_id === studentId);
+    if (st) {
+      const user = mockStore.users.find(u => u.id === st.user_id);
+      return { rows: user ? [{ id: user.id }] : [{ id: st.user_id }], rowCount: 1 };
+    }
+    return { rows: [{ id: 'u10' }], rowCount: 1 };
+  }
+
   // 1. SELECT users BY EMAIL / ENROLLMENT NO / EMPLOYEE ID
   if (cleanSql.includes('from users') && (cleanSql.includes('email') || cleanSql.includes('enrollment_no') || cleanSql.includes('$1')) && !cleanSql.includes('where id = $1')) {
     const identifier = (params[0] || '').toLowerCase().trim();
@@ -169,22 +180,62 @@ const query = async (text, params = []) => {
 
   // 16. SELECT gate_passes
   if (cleanSql.includes('from gate_passes')) {
-    if (cleanSql.includes('pass_number = $1')) {
-      const passNum = params[0];
-      const gp = mockStore.gatePasses.find(g => g.pass_number === passNum || g.id === passNum);
-      return { rows: gp ? [gp] : [], rowCount: gp ? 1 : 0 };
+    const normalizeGp = (g) => {
+      const st = mockStore.students.find(s => s.id === g.student_id || s.user_id === g.student_id) || mockStore.students[0];
+      return {
+        ...g,
+        from_datetime: g.from_datetime || g.out_date_time,
+        to_datetime: g.to_datetime || g.expected_in_date_time,
+        remarks: g.remarks || g.warden_comment,
+        student_name: g.student_name || st.name,
+        enrollment_no: g.enrollment_no || st.enrollment_no,
+        phone: g.phone || st.phone,
+        hostel_name: g.hostel_name || 'Bhabha Hall (Boys Hostel A)',
+        room_number: g.room_number || 'B-304',
+        qr_data: g.qr_data || g.qr_code_data || JSON.stringify({
+          id: g.id,
+          passNumber: g.pass_number || 'GP-VERIFIED',
+          studentName: g.student_name || st.name,
+          enrollment: g.enrollment_no || st.enrollment_no,
+          destination: g.destination,
+          status: g.status
+        })
+      };
+    };
+
+    if (cleanSql.includes('id = $1') || cleanSql.includes('pass_number = $1')) {
+      const id = params[0];
+      const gp = mockStore.gatePasses.find(g => g.id === id || g.pass_number === id);
+      return { rows: gp ? [normalizeGp(gp)] : [], rowCount: gp ? 1 : 0 };
+    }
+    if (cleanSql.includes('where gp.status = $1') || cleanSql.includes('where status = $1')) {
+      const status = params[0];
+      const gps = mockStore.gatePasses.filter(g => g.status === status).map(normalizeGp);
+      return { rows: gps, rowCount: gps.length };
     }
     if (cleanSql.includes('student_id')) {
       const studentId = params[0];
-      const gps = mockStore.gatePasses.filter(g => g.student_id === studentId || studentId === 's10');
+      const gps = mockStore.gatePasses.filter(g => g.student_id === studentId || studentId === 's10').map(normalizeGp);
       return { rows: gps, rowCount: gps.length };
     }
-    return { rows: mockStore.gatePasses, rowCount: mockStore.gatePasses.length };
+    return { rows: mockStore.gatePasses.map(normalizeGp), rowCount: mockStore.gatePasses.length };
   }
 
   // 17. SELECT notifications
   if (cleanSql.includes('from notifications')) {
-    return { rows: mockStore.notifications, rowCount: mockStore.notifications.length };
+    const userId = params[0];
+    let userNotifs = mockStore.notifications;
+    if (userId) {
+      userNotifs = mockStore.notifications.filter(n => n.user_id === userId || !n.user_id);
+    }
+    if (cleanSql.includes('is_read = false') || cleanSql.includes('unread')) {
+      userNotifs = userNotifs.filter(n => !n.is_read);
+    }
+    if (cleanSql.includes('count(*)')) {
+      const count = userNotifs.filter(n => !n.is_read).length;
+      return { rows: [{ count }], rowCount: 1 };
+    }
+    return { rows: userNotifs, rowCount: userNotifs.length };
   }
 
   // 18. SELECT audit_logs
@@ -204,28 +255,123 @@ const query = async (text, params = []) => {
 
   // INSERT INTO gate_passes
   if (cleanSql.includes('insert into gate_passes')) {
+    const id = params[0] || ('gp_' + Date.now());
+    const studentId = params[1] || 's10';
+    const reason = params[2] || 'Campus Outpass';
+    const destination = params[3] || 'Home';
+    const fromDatetime = params[4] || new Date().toISOString();
+    const toDatetime = params[5] || new Date().toISOString();
+
+    const studentObj = mockStore.students.find(s => s.id === studentId || s.user_id === studentId) || mockStore.students[0];
     const newGp = {
-      id: 'gp_' + Date.now(),
+      id,
       pass_number: 'GP-' + Math.floor(100000 + Math.random() * 900000),
-      student_id: params[0] || 's10',
-      reason: params[1] || 'Leave',
-      destination: params[2] || 'Home',
-      out_date_time: params[3] || new Date().toISOString(),
-      expected_in_date_time: params[4] || new Date().toISOString(),
+      student_id: studentObj.id,
+      reason,
+      destination,
+      from_datetime: fromDatetime,
+      to_datetime: toDatetime,
+      out_date_time: fromDatetime,
+      expected_in_date_time: toDatetime,
       status: 'pending',
+      qr_code: null,
+      qr_data: null,
       qr_code_data: null,
-      actual_out_time: null,
-      actual_in_time: null,
-      warden_comment: null,
+      remarks: null,
       created_at: new Date(),
-      student_name: 'Arjun Patel',
-      enrollment_no: 'CSE2021001',
+      student_name: studentObj.name || 'Arjun Patel',
+      enrollment_no: studentObj.enrollment_no || 'CSE2021001',
       hostel_name: 'Bhabha Hall (Boys Hostel A)',
       room_number: 'B-304',
-      phone: '9900000010'
+      phone: studentObj.phone || '9900000010'
     };
     mockStore.gatePasses.unshift(newGp);
     return { rows: [newGp], rowCount: 1 };
+  }
+
+  // UPDATE gate_passes (Approve / Reject)
+  if (cleanSql.includes('update gate_passes')) {
+    const gpId = params[params.length - 1];
+    const gp = mockStore.gatePasses.find(g => g.id === gpId || g.pass_number === gpId);
+    if (gp) {
+      if (cleanSql.includes("status = 'approved'")) {
+        gp.status = 'approved';
+        gp.approved_by = params[0];
+        gp.remarks = params[1];
+        gp.qr_code = params[2];
+        gp.qr_data = params[3];
+        gp.qr_code_data = params[3];
+        gp.approved_at = new Date();
+      } else if (cleanSql.includes("status = 'rejected'")) {
+        gp.status = 'rejected';
+        gp.approved_by = params[0];
+        gp.remarks = params[1];
+        gp.approved_at = new Date();
+      }
+      gp.updated_at = new Date();
+      return { rows: [gp], rowCount: 1 };
+    }
+    return { rows: [], rowCount: 0 };
+  }
+
+  // INSERT INTO notifications
+  if (cleanSql.includes('insert into notifications')) {
+    const notif = {
+      id: 'n_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      user_id: params[0],
+      title: params[1],
+      message: params[2],
+      type: params[3] || 'info',
+      reference_type: params[4] || null,
+      reference_id: params[5] || null,
+      is_read: false,
+      created_at: new Date()
+    };
+    mockStore.notifications.unshift(notif);
+    return { rows: [notif], rowCount: 1 };
+  }
+
+  // UPDATE notifications (Mark Read)
+  if (cleanSql.includes('update notifications set is_read = true')) {
+    if (cleanSql.includes('where id = $1')) {
+      const n = mockStore.notifications.find(item => item.id === params[0]);
+      if (n) n.is_read = true;
+    } else {
+      const userId = params[0];
+      mockStore.notifications.forEach(n => {
+        if (!userId || n.user_id === userId) n.is_read = true;
+      });
+    }
+    return { rows: [], rowCount: 1 };
+  }
+
+  // INSERT INTO attendance
+  if (cleanSql.includes('insert into attendance')) {
+    const studentId = params[0];
+    const courseId = params[1];
+    const date = params[2];
+    const status = params[3];
+    const markedBy = params[4];
+
+    const course = mockStore.courses.find(c => c.id === courseId);
+    const existingIdx = mockStore.attendance.findIndex(a => a.student_id === studentId && a.course_id === courseId && a.date === date);
+    const attObj = {
+      id: 'att_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      student_id: studentId,
+      course_id: courseId,
+      date,
+      status,
+      marked_by: markedBy,
+      course_name: course?.name || 'Lecture Course',
+      course_code: course?.code || 'CS'
+    };
+
+    if (existingIdx >= 0) {
+      mockStore.attendance[existingIdx].status = status;
+    } else {
+      mockStore.attendance.unshift(attObj);
+    }
+    return { rows: [attObj], rowCount: 1 };
   }
 
   // INSERT INTO no_dues_requests

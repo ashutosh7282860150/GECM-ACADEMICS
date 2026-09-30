@@ -11,45 +11,48 @@ INSERT INTO departments (id, name, code, description) VALUES
 ON CONFLICT (code) DO NOTHING;
 
 -- =============================================
--- USERS (passwords are hashed 'password123')
--- bcrypt hash for 'password123'
+-- USERS — per-role bcrypt hashes (rounds = 12, verified)
+-- Passwords:
+--   admin / hod / warden / accounts : Admin@123
+--   faculty*                         : Faculty@123
+--   student*                         : Student@123
 -- =============================================
 INSERT INTO users (id, name, email, password_hash, role, phone, is_active) VALUES
-  -- Admin
-  ('u0000000-0000-0000-0000-000000000001', 'Dr. Ramesh Kumar', 'admin@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'admin', '9800000001', TRUE),
-  -- HOD CSE
-  ('u0000000-0000-0000-0000-000000000002', 'Prof. Anita Sharma', 'hod.cse@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'hod', '9800000002', TRUE),
-  -- Warden
-  ('u0000000-0000-0000-0000-000000000003', 'Mr. Suresh Patel', 'warden@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'warden', '9800000003', TRUE),
-  -- Accounts
-  ('u0000000-0000-0000-0000-000000000004', 'Mrs. Priya Mehta', 'accounts@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'accounts', '9800000004', TRUE),
-  -- Faculty 1
-  ('u0000000-0000-0000-0000-000000000005', 'Dr. Vikram Singh', 'faculty1@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'faculty', '9800000005', TRUE),
-  -- Faculty 2
-  ('u0000000-0000-0000-0000-000000000006', 'Dr. Kavitha Rao', 'faculty2@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'faculty', '9800000006', TRUE),
-  -- Faculty 3
-  ('u0000000-0000-0000-0000-000000000007', 'Prof. Rajan Nair', 'faculty3@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'faculty', '9800000007', TRUE),
-  -- Student 1
-  ('u0000000-0000-0000-0000-000000000010', 'Arjun Patel', 'student1@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000010', TRUE),
-  -- Student 2
-  ('u0000000-0000-0000-0000-000000000011', 'Priya Sharma', 'student2@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000011', TRUE),
-  -- Student 3
-  ('u0000000-0000-0000-0000-000000000012', 'Rohit Verma', 'student3@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000012', TRUE),
-  -- Student 4
-  ('u0000000-0000-0000-0000-000000000013', 'Sneha Gupta', 'student4@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000013', TRUE),
-  -- Student 5
-  ('u0000000-0000-0000-0000-000000000014', 'Amit Kumar', 'student5@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000014', TRUE),
-  -- Student 6
-  ('u0000000-0000-0000-0000-000000000015', 'Divya Nair', 'student6@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000015', TRUE),
-  -- Student 7
-  ('u0000000-0000-0000-0000-000000000016', 'Karan Mehta', 'student7@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000016', TRUE),
-  -- Student 8
-  ('u0000000-0000-0000-0000-000000000017', 'Riya Singh', 'student8@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000017', TRUE),
-  -- Student 9
-  ('u0000000-0000-0000-0000-000000000018', 'Rahul Das', 'student9@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000018', TRUE),
-  -- Student 10
-  ('u0000000-0000-0000-0000-000000000019', 'Pooja Pillai', 'student10@smartcampus.edu', '$2b$10$gyH9PLhGSzYGAOh8cNTwc.lD5G4NRDV7JOlrR7QKrBZyfebQfEQca', 'student', '9900000019', TRUE)
-ON CONFLICT (email) DO NOTHING;
+  -- Admin    (Admin@123)
+  ('u0000000-0000-0000-0000-000000000001', 'Dr. Ramesh Kumar',   'admin@smartcampus.edu',    '$2b$12$KqRGhn2yJko326zERwrSMO.SqyIRApLU3kHvMb.o12V7wb7mSEMie', 'admin',    '9800000001', TRUE),
+  -- HOD CSE  (Admin@123)
+  ('u0000000-0000-0000-0000-000000000002', 'Prof. Anita Sharma', 'hod.cse@smartcampus.edu',  '$2b$12$KqRGhn2yJko326zERwrSMO.SqyIRApLU3kHvMb.o12V7wb7mSEMie', 'hod',      '9800000002', TRUE),
+  -- Warden   (Admin@123)
+  ('u0000000-0000-0000-0000-000000000003', 'Mr. Suresh Patel',   'warden@smartcampus.edu',   '$2b$12$KqRGhn2yJko326zERwrSMO.SqyIRApLU3kHvMb.o12V7wb7mSEMie', 'warden',   '9800000003', TRUE),
+  -- Accounts (Admin@123)
+  ('u0000000-0000-0000-0000-000000000004', 'Mrs. Priya Mehta',   'accounts@smartcampus.edu', '$2b$12$KqRGhn2yJko326zERwrSMO.SqyIRApLU3kHvMb.o12V7wb7mSEMie', 'accounts', '9800000004', TRUE),
+  -- Faculty 1 (Faculty@123)
+  ('u0000000-0000-0000-0000-000000000005', 'Dr. Vikram Singh',   'faculty1@smartcampus.edu', '$2b$12$Jv70q5aAVmRatgb5oHijLuw8KTsPlbbUT1ail7NkvEJUvGwszMWdC', 'faculty',  '9800000005', TRUE),
+  -- Faculty 2 (Faculty@123)
+  ('u0000000-0000-0000-0000-000000000006', 'Dr. Kavitha Rao',    'faculty2@smartcampus.edu', '$2b$12$Jv70q5aAVmRatgb5oHijLuw8KTsPlbbUT1ail7NkvEJUvGwszMWdC', 'faculty',  '9800000006', TRUE),
+  -- Faculty 3 (Faculty@123)
+  ('u0000000-0000-0000-0000-000000000007', 'Prof. Rajan Nair',   'faculty3@smartcampus.edu', '$2b$12$Jv70q5aAVmRatgb5oHijLuw8KTsPlbbUT1ail7NkvEJUvGwszMWdC', 'faculty',  '9800000007', TRUE),
+  -- Student 1  (Student@123)
+  ('u0000000-0000-0000-0000-000000000010', 'Arjun Patel',   'student1@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000010', TRUE),
+  -- Student 2  (Student@123)
+  ('u0000000-0000-0000-0000-000000000011', 'Priya Sharma',  'student2@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000011', TRUE),
+  -- Student 3  (Student@123)
+  ('u0000000-0000-0000-0000-000000000012', 'Rohit Verma',   'student3@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000012', TRUE),
+  -- Student 4  (Student@123)
+  ('u0000000-0000-0000-0000-000000000013', 'Sneha Gupta',   'student4@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000013', TRUE),
+  -- Student 5  (Student@123)
+  ('u0000000-0000-0000-0000-000000000014', 'Amit Kumar',    'student5@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000014', TRUE),
+  -- Student 6  (Student@123)
+  ('u0000000-0000-0000-0000-000000000015', 'Divya Nair',    'student6@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000015', TRUE),
+  -- Student 7  (Student@123)
+  ('u0000000-0000-0000-0000-000000000016', 'Karan Mehta',   'student7@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000016', TRUE),
+  -- Student 8  (Student@123)
+  ('u0000000-0000-0000-0000-000000000017', 'Riya Singh',    'student8@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000017', TRUE),
+  -- Student 9  (Student@123)
+  ('u0000000-0000-0000-0000-000000000018', 'Rahul Das',     'student9@smartcampus.edu',  '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000018', TRUE),
+  -- Student 10 (Student@123)
+  ('u0000000-0000-0000-0000-000000000019', 'Pooja Pillai',  'student10@smartcampus.edu', '$2b$12$aLPSxIr2CuRgqwYCpa/5hujJHwSbDWWBJP0c0WzwOrDm7AV6y.2sq', 'student', '9900000019', TRUE)
+ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 
 -- =============================================
 -- FACULTY RECORDS

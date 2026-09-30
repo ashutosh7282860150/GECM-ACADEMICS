@@ -21,13 +21,17 @@ export default function WardenGatePassPage() {
   const scannerRef = useRef(null);
 
   const fetchPasses = () => {
-    gatePassAPI.getAll({ status: filter })
+    gatePassAPI.getAll({ status: filter === 'all' ? undefined : filter })
       .then(res => setPasses(res.data.data || []))
       .catch(console.error)
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { setLoading(true); fetchPasses(); }, [filter]);
+  useEffect(() => {
+    fetchPasses();
+    const interval = setInterval(fetchPasses, 3500);
+    return () => clearInterval(interval);
+  }, [filter]);
 
   const handleAction = async (action) => {
     setProcessing(true);

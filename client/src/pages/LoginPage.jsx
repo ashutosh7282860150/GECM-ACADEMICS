@@ -5,9 +5,9 @@ import toast from 'react-hot-toast';
 import GECMLogo from '../components/GECMLogo';
 import './LoginPage.css';
 
-// ─────────────────────────────────────────────
-// Role configuration
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Role configuration — must match ROLE_ALIAS_MAP in server/routes/auth.js
+// ─────────────────────────────────────────────────────────────────────────────
 const ROLES = [
   {
     id: 'student',
@@ -19,7 +19,7 @@ const ROLES = [
     dashboard: '/student/dashboard',
     demo: {
       email: 'student1@smartcampus.edu',
-      password: 'password123',
+      password: 'Student@123',
       name: 'Arjun Patel',
       hint: 'B.Tech CSE — Semester 7'
     }
@@ -34,7 +34,7 @@ const ROLES = [
     dashboard: '/faculty/dashboard',
     demo: {
       email: 'faculty1@smartcampus.edu',
-      password: 'password123',
+      password: 'Faculty@123',
       name: 'Dr. Vikram Singh',
       hint: 'Associate Professor — CSE Dept'
     }
@@ -49,86 +49,89 @@ const ROLES = [
     dashboard: '/admin/dashboard',
     demo: {
       email: 'admin@smartcampus.edu',
-      password: 'password123',
+      password: 'Admin@123',
       name: 'Dr. Ramesh Kumar',
       hint: 'System Administrator'
     }
   }
 ];
 
-// Extra demo accounts (warden, accounts, hod) shown only under Administrator role
+// Extra demo accounts shown only under Administrator role
 const EXTRA_DEMOS = {
   administrator: [
     {
       email: 'hod.cse@smartcampus.edu',
-      password: 'password123',
+      password: 'Admin@123',
       label: 'HOD',
       hint: 'Head of Dept — CSE'
     },
     {
       email: 'warden@smartcampus.edu',
-      password: 'password123',
+      password: 'Admin@123',
       label: 'Warden',
       hint: 'Hostel Admin'
     },
     {
       email: 'accounts@smartcampus.edu',
-      password: 'password123',
+      password: 'Admin@123',
       label: 'Accounts',
       hint: 'Fee Cell'
     }
   ]
 };
 
-// Map role UI → backend role(s) accepted
+// Backend role → frontend route mapping (matches App.jsx ProtectedRoute allowedRoles)
 const ROLE_REDIRECT = {
-  student: '/student/dashboard',
-  faculty: '/faculty/dashboard',
-  hod: '/faculty/dashboard',
-  warden: '/warden/dashboard',
+  student:  '/student/dashboard',
+  faculty:  '/faculty/dashboard',
+  hod:      '/faculty/dashboard',
+  warden:   '/warden/dashboard',
   accounts: '/accounts/dashboard',
-  admin: '/admin/dashboard',
+  admin:    '/admin/dashboard',
 };
 
-// ─────────────────────────────────────────────
-// Error messages (user-facing, safe)
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// User-friendly error messages — one toast per request, always
+// ─────────────────────────────────────────────────────────────────────────────
 function getFriendlyError(err) {
-  const status = err?.response?.status;
-  const msg = err?.response?.data?.message;
-
   if (!err?.response) {
-    return 'Unable to reach the server. Please check your connection and try again.';
+    // Network / CORS / backend unreachable
+    return 'Unable to reach the server. Please check your internet connection or try again later.';
   }
+
+  const status = err.response.status;
+  const msg    = err.response?.data?.message;
+
   if (status === 400) return msg || 'Please check the information you entered.';
-  if (status === 401) return 'Incorrect email or password. Please try again.';
-  if (status === 403) return msg || 'You do not have permission to access this role.';
+  if (status === 401) return 'Incorrect email/registration number or password. Please try again.';
+  if (status === 403) return msg || 'You do not have permission to access this role. Please select the correct tab.';
+  if (status === 404) return 'Login service not found. Please contact support.';
   if (status === 429) {
-    const retry = err?.response?.data?.retryAfter;
+    const retry = err.response?.data?.retryAfter;
     return `Too many login attempts. Please wait ${retry || 15} minutes before trying again.`;
   }
   if (status >= 500) return 'A server error occurred. Please try again in a moment.';
   return msg || 'Login failed. Please try again.';
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Login Page Component
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 export default function LoginPage() {
   const { user, login } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate        = useNavigate();
+  const location        = useLocation();
 
-  const [selectedRole, setSelectedRole] = useState('student');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [loginError, setLoginError] = useState('');
-  const [demoFilled, setDemoFilled] = useState(false);
+  const [selectedRole,  setSelectedRole]  = useState('student');
+  const [email,         setEmail]         = useState('');
+  const [password,      setPassword]      = useState('');
+  const [showPassword,  setShowPassword]  = useState(false);
+  const [loading,       setLoading]       = useState(false);
+  const [errors,        setErrors]        = useState({});
+  const [loginError,    setLoginError]    = useState('');
+  const [demoFilled,    setDemoFilled]    = useState(false);
 
-  // Prevent duplicate submissions
+  // ── Single submission gate — prevents any duplicate requests ─────────────
   const isSubmittingRef = useRef(false);
 
   // Redirect if already logged in
@@ -139,13 +142,14 @@ export default function LoginPage() {
     }
   }, [user, navigate]);
 
-  // Clear errors when user types
+  // ── Field change handlers ─────────────────────────────────────────────────
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
     setErrors(prev => ({ ...prev, email: '' }));
     setLoginError('');
     setDemoFilled(false);
   };
+
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
     setErrors(prev => ({ ...prev, password: '' }));
@@ -153,8 +157,9 @@ export default function LoginPage() {
     setDemoFilled(false);
   };
 
-  // Switch role tab — clears form (do NOT auto-fill credentials)
+  // ── Role tab switch — clear form ──────────────────────────────────────────
   const handleRoleChange = (roleId) => {
+    if (loading) return;           // don't switch while a request is running
     setSelectedRole(roleId);
     setEmail('');
     setPassword('');
@@ -163,44 +168,56 @@ export default function LoginPage() {
     setDemoFilled(false);
   };
 
-  // Fill demo credentials (does NOT submit)
+  // ── Fill demo credentials (does NOT submit) ───────────────────────────────
   const fillDemo = useCallback((demoEmail, demoPassword) => {
+    if (loading) return;
     setEmail(demoEmail);
     setPassword(demoPassword);
     setErrors({});
     setLoginError('');
     setDemoFilled(true);
-    toast.success('Demo credentials filled — click Login to continue', { duration: 3000 });
-  }, []);
+    toast.success('Demo credentials filled — click Sign In to continue', {
+      id: 'demo-filled',       // deduplicate: same ID = replace existing toast
+      duration: 3000
+    });
+  }, [loading]);
 
-  // Validate form
+  // ── Form validation ───────────────────────────────────────────────────────
   const validate = () => {
     const newErrors = {};
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail) {
       newErrors.email = 'Email address is required.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      newErrors.email = 'Please enter a valid email address.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail) && !/^[A-Za-z0-9]+$/.test(trimmedEmail)) {
+      // Accept email addresses OR alphanumeric enrollment numbers (e.g. CSE2021001)
+      newErrors.email = 'Please enter a valid email address or registration number.';
     }
+
     if (!password) {
       newErrors.password = 'Password is required.';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters.';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle login submit
+  // ── Submit handler — ONE handler, ONE request, deduplication enforced ─────
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    // Prevent double-click / duplicate submissions
-    if (isSubmittingRef.current || loading) return;
+    // Gate 1: ref-based guard (survives re-renders)
+    if (isSubmittingRef.current) return;
+
+    // Gate 2: React state-based guard (extra safety for rapid double-clicks)
+    if (loading) return;
 
     if (!validate()) return;
 
+    // Acquire the lock
     isSubmittingRef.current = true;
     setLoading(true);
     setLoginError('');
@@ -209,30 +226,35 @@ export default function LoginPage() {
       // Pass the selected UI role to backend for verification
       const loggedUser = await login(email.trim(), password, selectedRole);
 
-      toast.success(`Welcome back, ${loggedUser.name}!`, {
+      toast.success(`Welcome back, ${loggedUser.name || 'User'}!`, {
+        id: 'login-success',
         icon: '🎉',
         duration: 4000
       });
 
-      // Redirect to the role-specific dashboard
+      // Navigate to where the user was trying to go, or their role dashboard
       const from = location.state?.from || ROLE_REDIRECT[loggedUser.role] || '/';
       navigate(from, { replace: true });
+
     } catch (err) {
       const msg = getFriendlyError(err);
-      setLoginError(msg);
+      setLoginError(msg);   // inline banner (always shown)
 
-      // Only show toast for 429 (rate limit) — others are shown inline
+      // Toast only for 429 (rate limit) — all other errors shown inline only
+      // Using toast ID to prevent duplicate stacking
       if (err?.response?.status === 429) {
-        toast.error(msg, { duration: 6000 });
+        toast.error(msg, { id: 'login-error-429', duration: 8000 });
       }
+
     } finally {
+      // Always release the lock, always re-enable the button
       setLoading(false);
       isSubmittingRef.current = false;
     }
   };
 
   const currentRole = ROLES.find(r => r.id === selectedRole) || ROLES[0];
-  const extraDemos = EXTRA_DEMOS[selectedRole] || [];
+  const extraDemos  = EXTRA_DEMOS[selectedRole] || [];
 
   return (
     <div className="login-root">
@@ -291,7 +313,7 @@ export default function LoginPage() {
             <p className="login-form-subtitle">Select your role and enter your credentials</p>
           </div>
 
-          {/* Role Selector */}
+          {/* Role Selector Tabs */}
           <div className="login-role-selector">
             {ROLES.map(role => (
               <button
@@ -299,6 +321,7 @@ export default function LoginPage() {
                 type="button"
                 className={`login-role-btn ${selectedRole === role.id ? 'active' : ''}`}
                 onClick={() => handleRoleChange(role.id)}
+                disabled={loading}
                 style={selectedRole === role.id ? {
                   borderColor: role.color,
                   background: role.bg,
@@ -313,26 +336,41 @@ export default function LoginPage() {
           </div>
 
           {/* Role description */}
-          <div className="login-role-desc" style={{ color: currentRole.color, background: currentRole.bg, marginBottom: '16px' }}>
+          <div
+            className="login-role-desc"
+            style={{ color: currentRole.color, background: currentRole.bg, marginBottom: '16px' }}
+          >
             <span>{currentRole.icon}</span>
             <span>{currentRole.desc}</span>
           </div>
 
-          {/* Role-specific Demo Quick Fill Helper */}
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px', marginBottom: '20px' }}>
+          {/* Quick Demo section */}
+          <div style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            marginBottom: '20px'
+          }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: currentRole.color, background: currentRole.bg, padding: '2px 8px', borderRadius: '6px' }}>
+              <span style={{
+                fontSize: '0.72rem', fontWeight: 800, color: currentRole.color,
+                background: currentRole.bg, padding: '2px 8px', borderRadius: '6px'
+              }}>
                 ⚡ QUICK DEMO
               </span>
               <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
                 {currentRole.label} Credentials
               </span>
             </div>
+
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {/* Primary demo button */}
               <button
                 type="button"
                 onClick={() => fillDemo(currentRole.demo.email, currentRole.demo.password)}
                 disabled={loading}
+                title={`Email: ${currentRole.demo.email}\nPassword: ${currentRole.demo.password}\n${currentRole.demo.hint}`}
                 style={{
                   background: '#ffffff',
                   border: '1px solid #cbd5e1',
@@ -341,7 +379,8 @@ export default function LoginPage() {
                   fontSize: '0.78rem',
                   fontWeight: 600,
                   color: '#0f172a',
-                  cursor: 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px'
@@ -350,12 +389,15 @@ export default function LoginPage() {
                 <span>{currentRole.icon}</span>
                 <span>{currentRole.demo.name} ({currentRole.demo.email})</span>
               </button>
+
+              {/* Extra demos (HOD / Warden / Accounts) */}
               {extraDemos.map(d => (
                 <button
                   key={d.email}
                   type="button"
                   onClick={() => fillDemo(d.email, d.password)}
                   disabled={loading}
+                  title={`Email: ${d.email}\nPassword: ${d.password}\n${d.hint}`}
                   style={{
                     background: '#ffffff',
                     border: '1px solid #cbd5e1',
@@ -364,13 +406,33 @@ export default function LoginPage() {
                     fontSize: '0.78rem',
                     fontWeight: 600,
                     color: '#0f172a',
-                    cursor: 'pointer'
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.6 : 1,
                   }}
                 >
                   {d.label} ({d.email})
                 </button>
               ))}
             </div>
+
+            {/* Credential hint shown after demo fill */}
+            {demoFilled && (
+              <div style={{
+                marginTop: '8px',
+                padding: '6px 10px',
+                background: currentRole.bg,
+                borderRadius: '6px',
+                fontSize: '0.74rem',
+                color: currentRole.color,
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span>✅</span>
+                <span>Demo credentials loaded. Click <strong>Sign In</strong> to continue.</span>
+              </div>
+            )}
           </div>
 
           {/* Login Form */}
@@ -380,24 +442,24 @@ export default function LoginPage() {
             className="login-form"
             autoComplete="on"
           >
-            {/* Global Login Error */}
+            {/* Global Login Error Banner */}
             {loginError && (
-              <div className="login-error-banner" role="alert">
+              <div className="login-error-banner" role="alert" aria-live="assertive">
                 <span className="login-error-icon">⚠️</span>
                 <span>{loginError}</span>
               </div>
             )}
 
-            {/* Email Field */}
+            {/* Email / Registration Number Field */}
             <div className={`login-field ${errors.email ? 'has-error' : ''}`}>
               <label htmlFor="login-email" className="login-label">
-                Email Address
+                Email Address or Registration Number
               </label>
               <input
                 id="login-email"
-                type="email"
+                type="text"
                 className="login-input"
-                placeholder="your.email@smartcampus.edu"
+                placeholder="your.email@smartcampus.edu or CSE2021001"
                 value={email}
                 onChange={handleEmailChange}
                 autoComplete="email"
@@ -447,7 +509,7 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Helpers row */}
+            {/* Remember me / Forgot password row */}
             <div className="login-helpers">
               <label className="login-remember">
                 <input type="checkbox" defaultChecked /> Remember me
@@ -455,24 +517,29 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="login-forgot"
-                onClick={() => toast.info('Password reset link will be sent to your registered email.', { duration: 4000 })}
+                onClick={() => toast.info(
+                  'Password reset link will be sent to your registered email.',
+                  { id: 'forgot-pwd', duration: 4000 }
+                )}
               >
                 Forgot Password?
               </button>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button — disabled while loading to prevent duplicate requests */}
             <button
               id="login-submit-btn"
               type="submit"
               className="login-submit-btn"
               disabled={loading}
+              aria-disabled={loading}
+              aria-busy={loading}
               style={{ '--role-color': currentRole.color }}
             >
               {loading ? (
                 <>
                   <span className="login-spinner" />
-                  Authenticating...
+                  Authenticating…
                 </>
               ) : (
                 <>

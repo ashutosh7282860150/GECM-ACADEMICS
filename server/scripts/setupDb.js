@@ -24,14 +24,20 @@ async function setupDatabase() {
 
     console.log('🎉 Database setup complete!');
     console.log('\n📧 Demo Login Accounts:');
-    console.log('─'.repeat(50));
-    console.log('Admin:    admin@smartcampus.edu    / password123');
-    console.log('HOD:      hod.cse@smartcampus.edu / password123');
-    console.log('Warden:   warden@smartcampus.edu  / password123');
-    console.log('Accounts: accounts@smartcampus.edu/ password123');
-    console.log('Faculty:  faculty1@smartcampus.edu/ password123');
-    console.log('Student:  student1@smartcampus.edu/ password123');
-    console.log('─'.repeat(50));
+    console.log('─'.repeat(55));
+    console.log('Role        Email                        Password');
+    console.log('─'.repeat(55));
+    console.log('Admin     : admin@smartcampus.edu      / Admin@123');
+    console.log('HOD       : hod.cse@smartcampus.edu   / Admin@123');
+    console.log('Warden    : warden@smartcampus.edu    / Admin@123');
+    console.log('Accounts  : accounts@smartcampus.edu  / Admin@123');
+    console.log('Faculty   : faculty1@smartcampus.edu  / Faculty@123');
+    console.log('Student   : student1@smartcampus.edu  / Student@123');
+    console.log('─'.repeat(55));
+    console.log('Login tab  : Student → Student@123');
+    console.log('Login tab  : Faculty → Faculty@123');
+    console.log('Login tab  : Administrator → Admin@123');
+    console.log('─'.repeat(55));
     
     await pool.end();
   } catch (err) {

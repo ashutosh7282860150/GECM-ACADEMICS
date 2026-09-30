@@ -421,16 +421,28 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
       });
       newApp.current_status = 'UNDER_REVIEW';
 
-      // Send notification to assigned reviewer role
-      const reviewerUser = mockStore.users.find(u => u.role === config.responsibleRole) || mockStore.users[0];
-      mockStore.notifications.unshift({
-        id: 'n_' + Date.now(),
-        user_id: reviewerUser.id,
-        title: `New ${config.name} Application Received 📬`,
-        message: `${req.user.name} (${newApp.enrollment_no}) submitted ${config.name} (${appIdStr}). Needs your review.`,
-        type: 'action_required',
-        is_read: false,
-        created_at: now
+      // Send real-time notification to all assigned reviewer users & admin
+      const reviewerUsers = mockStore.users.filter(u =>
+        u.role === config.responsibleRole ||
+        (config.responsibleRole === 'admin' && u.role === 'admin') ||
+        (config.responsibleRole === 'hod' && (u.role === 'hod' || u.role === 'faculty')) ||
+        u.role === 'admin' // Admin also has institutional oversight
+      );
+
+      const targetUsers = reviewerUsers.length > 0 ? reviewerUsers : mockStore.users.filter(u => u.role === 'admin');
+
+      targetUsers.forEach((rev, idx) => {
+        mockStore.notifications.unshift({
+          id: 'n_' + Date.now() + '_' + idx,
+          user_id: rev.id,
+          title: `New ${config.name} Application Received 📬`,
+          message: `${req.user.name} (${newApp.enrollment_no}) submitted ${config.name} (${appIdStr}). Needs review.`,
+          type: 'action_required',
+          reference_type: 'application',
+          reference_id: appIdStr,
+          is_read: false,
+          created_at: now
+        });
       });
     }
 
@@ -438,7 +450,7 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: isDraft ? 'Draft saved successfully!' : `Application ${appIdStr} submitted & assigned to ${config.responsibleDepartment}!`,
+      message: isDraft ? 'Draft saved successfully!' : `Application ${appIdStr} submitted! Real-time alert dispatched to ${config.responsibleDepartment}.`,
       data: newApp
     });
   } catch (err) {
@@ -536,6 +548,8 @@ router.put('/:id/review', authenticate, authorize('admin', 'faculty', 'hod', 'wa
         title: notifTitle,
         message: notifMsg,
         type: notifType,
+        reference_type: 'application',
+        reference_id: app.application_id,
         is_read: false,
         created_at: now
       });

@@ -1,20 +1,47 @@
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 
+export const safeParseDate = (date) => {
+  if (!date) return null;
+  if (date instanceof Date) return isNaN(date.getTime()) ? null : date;
+  if (typeof date === 'number') {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (typeof date === 'string') {
+    const trimmed = date.trim();
+    if (!trimmed) return null;
+    try {
+      const d = parseISO(trimmed);
+      if (!isNaN(d.getTime())) return d;
+    } catch (_) {}
+    try {
+      const d = new Date(trimmed);
+      if (!isNaN(d.getTime())) return d;
+    } catch (_) {}
+  }
+  return null;
+};
+
 export const formatDate = (date, fmt = 'dd MMM yyyy') => {
-  if (!date) return 'N/A';
+  const d = safeParseDate(date);
+  if (!d) return 'N/A';
   try {
-    const d = typeof date === 'string' ? parseISO(date) : date;
     return format(d, fmt);
-  } catch { return 'N/A'; }
+  } catch {
+    return 'N/A';
+  }
 };
 
 export const formatDateTime = (date) => formatDate(date, 'dd MMM yyyy, hh:mm a');
 export const formatTime = (date) => formatDate(date, 'hh:mm a');
 export const timeAgo = (date) => {
-  if (!date) return '';
+  const d = safeParseDate(date);
+  if (!d) return '';
   try {
-    return formatDistanceToNow(typeof date === 'string' ? parseISO(date) : date, { addSuffix: true });
-  } catch { return ''; }
+    return formatDistanceToNow(d, { addSuffix: true });
+  } catch {
+    return '';
+  }
 };
 
 export const formatCurrency = (amount, currency = 'INR') => {

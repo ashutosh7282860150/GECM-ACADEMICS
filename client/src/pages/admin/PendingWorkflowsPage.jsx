@@ -7,11 +7,17 @@ export default function PendingWorkflowsPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('nodues');
 
-  useEffect(() => {
+  const fetchWorkflows = () => {
     adminAPI.getPendingWorkflows()
       .then(res => setData(res.data.data || { noDues: [], gatePasses: [] }))
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchWorkflows();
+    const interval = setInterval(fetchWorkflows, 3500);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) return <div className="loading-page"><div className="spinner" /></div>;

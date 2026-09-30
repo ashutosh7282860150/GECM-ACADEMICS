@@ -34,7 +34,7 @@ export default function ApplicationsInboxPage() {
 
   useEffect(() => {
     fetchInbox();
-    const interval = setInterval(fetchInbox, 10000); // Real-time polling every 10s
+    const interval = setInterval(fetchInbox, 2500); // Live real-time polling every 2.5s
     return () => clearInterval(interval);
   }, [statusFilter, typeFilter, searchQuery, sortBy]);
 
@@ -79,7 +79,11 @@ export default function ApplicationsInboxPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h1 className="page-title">📥 Applications Inbox ({user?.role.toUpperCase()})</h1>
-          <p className="page-desc">Review student applications, verify department clearances, approve, reject or request corrections</p>
+          <p className="page-desc">Review student applications, verify department clearances, approve, reject or request corrections in real time</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '6px 12px', borderRadius: '6px', color: '#15803d', fontSize: '0.78rem', fontWeight: 700 }}>
+          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a', animation: 'pulse 1.5s infinite' }}></span>
+          <span>⚡ Live Real-Time Sync</span>
         </div>
       </div>
 

@@ -24,7 +24,7 @@ export default function MyApplicationsPage() {
 
   useEffect(() => {
     fetchApplications();
-    const interval = setInterval(fetchApplications, 10000); // Poll every 10s for real-time updates
+    const interval = setInterval(fetchApplications, 2500); // Poll every 2.5s for instant real-time sync
     return () => clearInterval(interval);
   }, []);
 
@@ -55,6 +55,10 @@ export default function MyApplicationsPage() {
         <div className="page-header-left">
           <h1 className="page-title">📋 My Applications</h1>
           <p className="page-desc">Track real-time routing status, reviewer notes, department clearances, and download certificates</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '6px 12px', borderRadius: '6px', color: '#15803d', fontSize: '0.78rem', fontWeight: 700 }}>
+          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a', animation: 'pulse 1.5s infinite' }}></span>
+          <span>⚡ Live Real-Time Sync</span>
         </div>
       </div>
 

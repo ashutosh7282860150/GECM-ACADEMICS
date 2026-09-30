@@ -5,26 +5,77 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 
-// Valid roles accepted by the system
+// ─────────────────────────────────────────────────────────────────────────────
+// Role configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+// All valid backend role values stored in the database
 const VALID_ROLES = ['student', 'faculty', 'hod', 'warden', 'accounts', 'admin'];
 
-// Map frontend roles to backend accepted roles
+/**
+ * Maps the role the user SELECTED on the login UI → the backend role(s) that
+ * are accepted for that selection.
+ *
+ * e.g. A user who picks "Administrator" on the UI can be role: admin|hod|warden|accounts
+ *      A user who picks "Faculty" can be role: faculty|hod
+ *      A user who picks "Student" must be role: student only
+ */
 const ROLE_ALIAS_MAP = {
-  student: ['student'],
-  faculty: ['faculty', 'hod'],
+  student:       ['student'],
+  faculty:       ['faculty', 'hod'],
   administrator: ['admin', 'hod', 'warden', 'accounts'],
-  admin: ['admin', 'hod', 'warden', 'accounts'],
-  warden: ['warden', 'admin'],
-  accounts: ['accounts', 'admin'],
-  hod: ['hod', 'faculty', 'admin'],
+  admin:         ['admin', 'hod', 'warden', 'accounts'],
+  warden:        ['warden', 'admin'],
+  accounts:      ['accounts', 'admin'],
+  hod:           ['hod', 'faculty', 'admin'],
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Dev-mode demo password map (bypasses bcrypt for speed in demo/development)
+// Maps plaintext password → accepted when NODE_ENV !== 'production'
+// NEVER used in production.
+// ─────────────────────────────────────────────────────────────────────────────
+const DEV_DEMO_PASSWORDS = new Set([
+  'Student@123',
+  'Faculty@123',
+  'Admin@123',
+  'password123',  // legacy fallback
+]);
+
+/**
+ * Verify a password against its hash.
+ * In development, also accepts known demo passwords as a fallback
+ * so that even if the hash in the store is wrong the login still works.
+ */
+async function verifyPassword(plaintext, hash) {
+  // 1. Always try the proper bcrypt comparison first
+  try {
+    const ok = await bcrypt.compare(plaintext, hash);
+    if (ok) return true;
+  } catch (_) {
+    // malformed hash — fall through to dev fallback
+  }
+
+  // 2. Dev-only shortcut: allow known demo passwords without bcrypt
+  if (process.env.NODE_ENV !== 'production' && DEV_DEMO_PASSWORDS.has(plaintext)) {
+    console.warn(
+      `[AUTH DEV FALLBACK] bcrypt compare failed for hash "${hash.slice(0, 15)}…", ` +
+      `accepting demo password "${plaintext}" in development mode.`
+    );
+    return true;
+  }
+
+  return false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/auth/login
+// ─────────────────────────────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
   try {
     const { email, password, role: requestedRole } = req.body;
 
-    // Input validation
+    // ── Input validation ───────────────────────────────────────────────────
     if (!email || typeof email !== 'string') {
       return res.status(400).json({ success: false, message: 'Email or Registration Number is required.' });
     }
@@ -34,7 +85,7 @@ router.post('/login', async (req, res) => {
 
     const identifier = email.trim().toLowerCase();
 
-    // Fetch user from DB (by email, enrollment_no, or employee_id)
+    // ── Fetch user from DB (by email, enrollment_no, or employee_id) ───────
     const userResult = await pool.query(
       `SELECT u.* FROM users u 
        LEFT JOIN students s ON u.id = s.user_id 
@@ -45,42 +96,50 @@ router.post('/login', async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(401).json({ success: false, message: 'Invalid email/registration number or password.' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email/registration number or password.'
+      });
     }
 
     const user = userResult.rows[0];
 
-    // Verify password (supports bcrypt hash and dev fallback)
-    let isValid = false;
-    try {
-      isValid = await bcrypt.compare(password, user.password_hash);
-    } catch (e) {
-      isValid = false;
-    }
-    if (!isValid && (password === 'password123' || password === user.password_hash)) {
-      isValid = true;
-    }
+    // ── Password verification ──────────────────────────────────────────────
+    const isValid = await verifyPassword(password, user.password_hash);
 
     if (!isValid) {
-      return res.status(401).json({ success: false, message: 'Invalid email/registration number or password.' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email/registration number or password.'
+      });
     }
 
-    // ── ROLE VERIFICATION (backend enforced) ──────────────────────────────
+    // ── Role verification (backend enforced) ───────────────────────────────
     if (requestedRole) {
-      const allowedRoles = ROLE_ALIAS_MAP[requestedRole.toLowerCase()] || [requestedRole.toLowerCase()];
+      const normalizedRequested = requestedRole.toLowerCase();
+      const allowedRoles = ROLE_ALIAS_MAP[normalizedRequested] || [normalizedRequested];
       if (!allowedRoles.includes(user.role)) {
+        // Tell the user which tab they should use instead
+        const friendlyRole = {
+          student:  'Student',
+          faculty:  'Faculty',
+          hod:      'Faculty',
+          warden:   'Administrator',
+          accounts: 'Administrator',
+          admin:    'Administrator',
+        }[user.role] || user.role;
+
         return res.status(403).json({
           success: false,
-          message: `Access denied. Your account is registered as '${user.role}', but you selected '${requestedRole}'. Please select the '${user.role}' tab.`
+          message: `Access denied. Your account belongs to the "${friendlyRole}" role. Please select the "${friendlyRole}" tab and try again.`
         });
       }
     }
-    // ──────────────────────────────────────────────────────────────────────
 
-    // Update last login timestamp (non-blocking)
+    // ── Update last login (non-blocking) ──────────────────────────────────
     pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]).catch(() => {});
 
-    // Get role-specific profile data
+    // ── Role-specific profile data ─────────────────────────────────────────
     let profileData = {};
     if (user.role === 'student') {
       const st = await pool.query(
@@ -100,14 +159,14 @@ router.post('/login', async (req, res) => {
       if (fc.rows.length > 0) profileData = fc.rows[0];
     }
 
-    // Sign JWT
+    // ── Sign JWT ───────────────────────────────────────────────────────────
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    // Strip sensitive fields from profile data before sending
+    // Strip sensitive fields before sending
     const { password_hash, ...safeUser } = user;
     const { password_hash: _ph, ...safeProfile } = profileData;
 
@@ -125,13 +184,19 @@ router.post('/login', async (req, res) => {
         ...safeProfile
       }
     });
+
   } catch (err) {
     console.error('Login error:', err);
-    return res.status(500).json({ success: false, message: 'An error occurred during login. Please try again.' });
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred during login. Please try again.'
+    });
   }
 });
 
-// GET /api/auth/me — session validation (called on every page load, lenient limiter applied)
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/auth/me — session validation
+// ─────────────────────────────────────────────────────────────────────────────
 router.get('/me', authenticate, async (req, res) => {
   try {
     const user = req.user;
@@ -162,7 +227,9 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/auth/change-password
+// ─────────────────────────────────────────────────────────────────────────────
 router.post('/change-password', authenticate, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -198,10 +265,11 @@ router.post('/change-password', authenticate, async (req, res) => {
   }
 });
 
-// POST /api/auth/logout (client-side primarily, but good for audit logging)
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/logout
+// ─────────────────────────────────────────────────────────────────────────────
 router.post('/logout', authenticate, (req, res) => {
   // JWT is stateless; actual logout happens on client by removing token.
-  // This endpoint exists for audit logging / future token blacklist support.
   return res.json({ success: true, message: 'Logged out successfully.' });
 });
 

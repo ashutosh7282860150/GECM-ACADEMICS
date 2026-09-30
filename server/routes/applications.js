@@ -573,6 +573,36 @@ router.put('/:id/review', authenticate, authorize('admin', 'faculty', 'hod', 'wa
     app.correction_note = correctionNote || null;
     app.updated_at = now;
 
+    // If application has multi-department clearance matrix, also update reviewer's department card
+    if (app.clearances && app.clearances.length > 0) {
+      let roleDeptKeyword = '';
+      if (req.user.role === 'warden') roleDeptKeyword = 'hostel';
+      else if (req.user.role === 'accounts') roleDeptKeyword = 'account';
+      else if (req.user.role === 'hod') roleDeptKeyword = 'hod';
+      else if (req.user.role === 'faculty') roleDeptKeyword = 'faculty';
+      else if (req.user.role === 'admin') roleDeptKeyword = 'admin';
+
+      const cl = app.clearances.find(c => c.department.toLowerCase().includes(roleDeptKeyword));
+      if (cl) {
+        cl.status = action;
+        cl.verified_by = `${req.user.name} (${req.user.role.toUpperCase()})`;
+        cl.remarks = comment || rejectionReason || (action === 'APPROVED' ? 'Approved & Cleared' : 'Action Required');
+      }
+
+      // Recalculate overall status
+      const allApproved = app.clearances.every(c => c.status === 'APPROVED');
+      const anyRejected = app.clearances.some(c => c.status === 'REJECTED');
+
+      if (anyRejected) {
+        app.current_status = 'REJECTED';
+      } else if (allApproved) {
+        app.current_status = 'APPROVED';
+        app.reviewed_by_name = 'All Departments Cleared (Central Signoff)';
+      } else {
+        app.current_status = 'UNDER_REVIEW';
+      }
+    }
+
     let stepTitle = 'Reviewed by ' + req.user.name;
     if (action === 'APPROVED') stepTitle = `Approved by ${req.user.name} (${req.user.role.toUpperCase()})`;
     if (action === 'REJECTED') stepTitle = `Rejected by ${req.user.name}: ${rejectionReason}`;
@@ -627,7 +657,19 @@ router.put('/:id/clearance', authenticate, authorize('admin', 'faculty', 'hod', 
 
     if (!app || !app.clearances) return res.status(404).json({ success: false, message: 'Clearance application not found' });
 
-    const cl = app.clearances.find(c => c.department.toLowerCase() === department.toLowerCase() || c.department.toLowerCase().includes(department.toLowerCase()));
+    const d = (department || '').toLowerCase();
+    const cl = app.clearances.find(c => {
+      const cd = c.department.toLowerCase();
+      if (cd === d) return true;
+      if ((d.includes('hostel') || d.includes('warden')) && (cd.includes('hostel') || cd.includes('warden'))) return true;
+      if ((d.includes('fee') || d.includes('account')) && (cd.includes('fee') || cd.includes('account'))) return true;
+      if (d.includes('hod') && (cd.includes('hod') || cd.includes('department'))) return true;
+      if ((d.includes('faculty') || d.includes('lab')) && (cd.includes('faculty') || cd.includes('lab'))) return true;
+      if (d.includes('library') && cd.includes('library')) return true;
+      if (d.includes('admin') && cd.includes('admin')) return true;
+      return cd.includes(d) || d.includes(cd);
+    });
+
     if (cl) {
       cl.status = status;
       cl.verified_by = `${req.user.name} (${req.user.role.toUpperCase()})`;

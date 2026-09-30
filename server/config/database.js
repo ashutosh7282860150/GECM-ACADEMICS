@@ -423,6 +423,45 @@ const query = async (text, params = []) => {
     return { rows: [newNd], rowCount: 1 };
   }
 
+  // UPDATE no_dues_requests (Approve / Reject)
+  if (cleanSql.includes('update no_dues_requests')) {
+    const ndId = params[params.length - 1];
+    const nd = mockStore.noDuesRequests.find(n => n.id === ndId || n.request_number === ndId);
+    if (nd) {
+      if (cleanSql.includes('hostel_status')) {
+        nd.hostel_status = params[0];
+        nd.hostel_remarks = params[1];
+        nd.hostel_verified_by = params[2];
+        nd.hostel_verified_at = new Date();
+      } else if (cleanSql.includes('accounts_status')) {
+        nd.accounts_status = params[0];
+        nd.accounts_remarks = params[1];
+        nd.accounts_verified_by = params[2];
+        nd.accounts_verified_at = new Date();
+      } else if (cleanSql.includes('hod_status')) {
+        nd.hod_status = params[0];
+        nd.hod_remarks = params[1];
+        nd.hod_verified_by = params[2];
+        nd.hod_verified_at = new Date();
+      } else if (cleanSql.includes('faculty_status')) {
+        nd.faculty_status = params[0];
+        nd.faculty_remarks = params[1];
+        nd.faculty_verified_by = params[2];
+        nd.faculty_verified_at = new Date();
+      } else if (cleanSql.includes('admin_status')) {
+        nd.admin_status = params[0];
+        nd.admin_remarks = params[1];
+        nd.admin_verified_by = params[2];
+        nd.admin_verified_at = new Date();
+      } else if (cleanSql.includes('overall_status')) {
+        nd.overall_status = params[0];
+      }
+      nd.updated_at = new Date();
+      return { rows: [nd], rowCount: 1 };
+    }
+    return { rows: [], rowCount: 0 };
+  }
+
   // UPDATE / DEFAULT EMPTY RESULT
   return { rows: [], rowCount: 0 };
 };

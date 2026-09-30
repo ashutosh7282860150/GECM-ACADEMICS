@@ -24,6 +24,8 @@ export default function NoDuesVerifyPage({ role }) {
   const getRoleField = () => {
     if (role === 'warden') return 'hostel_status';
     if (role === 'accounts') return 'accounts_status';
+    if (role === 'hod') return 'hod_status';
+    if (role === 'faculty') return 'faculty_status';
     if (role === 'admin') return 'admin_status';
     return 'library_status';
   };
@@ -45,14 +47,14 @@ export default function NoDuesVerifyPage({ role }) {
     }
   };
 
-  const pendingForMe = requests.filter(r => r[roleField] === 'pending').length;
+  const pendingForMe = requests.filter(r => (r[roleField] || 'pending') === 'pending').length;
 
   return (
     <div className="dashboard-grid">
       <div className="page-header">
         <div className="page-header-left">
           <h1 className="page-title">✅ No-Dues Verification</h1>
-          <p className="page-desc">Review and verify student no-dues requests for your department</p>
+          <p className="page-desc">Review and verify student no-dues requests for your department ({role?.toUpperCase()})</p>
         </div>
         {pendingForMe > 0 && (
           <div className="alert alert-warning" style={{ marginBottom: 0 }}>
@@ -91,7 +93,7 @@ export default function NoDuesVerifyPage({ role }) {
                 <tr>
                   <th>Student</th><th>Enrollment</th><th>Department</th>
                   <th>Request Type</th>
-                  <th>Hostel</th><th>Library</th><th>Accounts</th><th>Admin</th>
+                  <th>Hostel</th><th>HOD</th><th>Faculty</th><th>Library</th><th>Accounts</th><th>Admin</th>
                   <th>Overall</th><th>Date</th><th>Action</th>
                 </tr>
               </thead>
@@ -103,13 +105,15 @@ export default function NoDuesVerifyPage({ role }) {
                     <td style={{ fontSize: '12px' }}>{r.department_name}</td>
                     <td style={{ textTransform: 'capitalize', fontSize: '12px' }}>{r.request_type}</td>
                     <td><span className={`badge ${getStatusBadgeClass(r.hostel_status)}`} style={{ fontSize: '10px' }}>{getStatusLabel(r.hostel_status)}</span></td>
+                    <td><span className={`badge ${getStatusBadgeClass(r.hod_status || 'pending')}`} style={{ fontSize: '10px' }}>{getStatusLabel(r.hod_status || 'pending')}</span></td>
+                    <td><span className={`badge ${getStatusBadgeClass(r.faculty_status || 'pending')}`} style={{ fontSize: '10px' }}>{getStatusLabel(r.faculty_status || 'pending')}</span></td>
                     <td><span className={`badge ${getStatusBadgeClass(r.library_status)}`} style={{ fontSize: '10px' }}>{getStatusLabel(r.library_status)}</span></td>
                     <td><span className={`badge ${getStatusBadgeClass(r.accounts_status)}`} style={{ fontSize: '10px' }}>{getStatusLabel(r.accounts_status)}</span></td>
                     <td><span className={`badge ${getStatusBadgeClass(r.admin_status)}`} style={{ fontSize: '10px' }}>{getStatusLabel(r.admin_status)}</span></td>
                     <td><span className={`badge ${getStatusBadgeClass(r.overall_status)}`}>{getStatusLabel(r.overall_status)}</span></td>
                     <td style={{ fontSize: '12px' }}>{timeAgo(r.created_at)}</td>
                     <td>
-                      {r[roleField] === 'pending' && (
+                      {(r[roleField] === 'pending' || !r[roleField]) && (
                         <button className="btn btn-primary btn-sm" onClick={() => { setActionModal(r); setRemarks(''); }}>
                           Verify
                         </button>
@@ -146,15 +150,17 @@ export default function NoDuesVerifyPage({ role }) {
               ))}
             </div>
 
-            {/* Status of other depts */}
+            {/* Status of all depts */}
             <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '8px' }}>Verification Status</div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '8px' }}>Multi-Department Status</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 {[
-                  { label: 'Hostel', status: actionModal.hostel_status },
-                  { label: 'Library', status: actionModal.library_status },
-                  { label: 'Accounts', status: actionModal.accounts_status },
-                  { label: 'Admin', status: actionModal.admin_status },
+                  { label: 'Hostel Warden', status: actionModal.hostel_status },
+                  { label: 'HOD CSE', status: actionModal.hod_status || 'pending' },
+                  { label: 'Faculty & Labs', status: actionModal.faculty_status || 'pending' },
+                  { label: 'Central Library', status: actionModal.library_status },
+                  { label: 'Fee Cell (Accounts)', status: actionModal.accounts_status },
+                  { label: 'Administrator', status: actionModal.admin_status },
                 ].map(d => (
                   <div key={d.label} style={{ textAlign: 'center', padding: '8px 12px', background: 'var(--bg-3)', borderRadius: 'var(--radius-sm)' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>{d.label}</div>

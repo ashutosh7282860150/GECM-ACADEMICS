@@ -147,9 +147,11 @@ const AppRoutes = () => (
     <Route path="/faculty/notices" element={<ProtectedRoute allowedRoles={['faculty', 'hod']}><FacultyNoticesPage /></ProtectedRoute>} />
     <Route path="/faculty/students" element={<ProtectedRoute allowedRoles={['faculty', 'hod']}><StudentsListPage /></ProtectedRoute>} />
     <Route path="/faculty/applications-inbox" element={<ProtectedRoute allowedRoles={['faculty']}><ApplicationsInboxPage /></ProtectedRoute>} />
+    <Route path="/faculty/nodues" element={<ProtectedRoute allowedRoles={['faculty', 'hod', 'admin']}><NoDuesVerifyPage role="faculty" /></ProtectedRoute>} />
 
     {/* ── HOD ROUTES ── */}
     <Route path="/hod/applications-inbox" element={<ProtectedRoute allowedRoles={['hod']}><ApplicationsInboxPage /></ProtectedRoute>} />
+    <Route path="/hod/nodues" element={<ProtectedRoute allowedRoles={['hod', 'admin']}><NoDuesVerifyPage role="hod" /></ProtectedRoute>} />
     <Route path="/hod/department" element={<ProtectedRoute allowedRoles={['hod']}><DepartmentsPage /></ProtectedRoute>} />
     <Route path="/hod/students" element={<ProtectedRoute allowedRoles={['hod']}><StudentsListPage /></ProtectedRoute>} />
     <Route path="/hod/approvals" element={<ProtectedRoute allowedRoles={['hod']}><PendingWorkflowsPage /></ProtectedRoute>} />

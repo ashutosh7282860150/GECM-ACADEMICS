@@ -16,6 +16,17 @@ export default function FeesPage() {
   const [successModal, setSuccessModal] = useState(null);
   const [activeTab, setActiveTab] = useState('fees');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [feeTypeFilter, setFeeTypeFilter] = useState('ALL');
+
+  const getFeeTypeIcon = (type) => {
+    const t = (type || '').toLowerCase();
+    if (t.includes('course') || t.includes('registration')) return '📚';
+    if (t.includes('tuition')) return '🎓';
+    if (t.includes('hostel') || t.includes('mess')) return '🏠';
+    if (t.includes('exam')) return '📝';
+    if (t.includes('library')) return '📖';
+    return '💳';
+  };
 
   const fetchFeeData = () => {
     Promise.all([feesAPI.getAll(), feesAPI.getPaymentHistory()])
@@ -82,6 +93,10 @@ export default function FeesPage() {
     });
   };
 
+  const filteredFees = feeTypeFilter === 'ALL'
+    ? fees
+    : fees.filter(f => (f.fee_type || '').toLowerCase().includes(feeTypeFilter.toLowerCase()));
+
   const totalPending = fees.filter(f => f.status !== 'paid').reduce((s, f) => s + parseFloat(f.amount), 0);
   const totalPaid = fees.filter(f => f.status === 'paid').reduce((s, f) => s + parseFloat(f.amount), 0);
 
@@ -92,7 +107,7 @@ export default function FeesPage() {
       <div className="page-header">
         <div className="page-header-left">
           <h1 className="page-title">💳 Fee Management &amp; Receipts</h1>
-          <p className="page-desc">View and pay your semester fees securely and download official receipts</p>
+          <p className="page-desc">View and pay your semester fees, course registration fees, and download official receipts</p>
         </div>
       </div>
 
@@ -134,6 +149,27 @@ export default function FeesPage() {
 
       {activeTab === 'fees' && (
         <div className="card">
+          {/* Fee Type Filter Pills */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '14px 16px 4px 16px', borderBottom: '1px solid var(--border)' }}>
+            {[
+              { id: 'ALL', label: 'All Fee Heads' },
+              { id: 'Course Registration', label: '📚 Course Registration Fee' },
+              { id: 'Tuition', label: '🎓 Tuition Fee' },
+              { id: 'Hostel', label: '🏠 Hostel Fee' },
+              { id: 'Exam', label: '📝 Exam Fee' },
+            ].map(f => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFeeTypeFilter(f.id)}
+                className={`btn btn-sm ${feeTypeFilter === f.id ? 'btn-primary' : 'btn-outline'}`}
+                style={{ fontSize: '11.5px', padding: '5px 12px', borderRadius: '20px' }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
           <div className="table-wrapper">
             <table>
               <thead>
@@ -142,13 +178,19 @@ export default function FeesPage() {
                 </tr>
               </thead>
               <tbody>
-                {fees.length === 0 ? (
-                  <tr><td colSpan={7}><div className="empty-state"><div className="empty-state-icon">💰</div><h4>No fee records found</h4></div></td></tr>
-                ) : fees.map(fee => {
+                {filteredFees.length === 0 ? (
+                  <tr><td colSpan={7}><div className="empty-state"><div className="empty-state-icon">💰</div><h4>No fee records found for selected filter</h4></div></td></tr>
+                ) : filteredFees.map(fee => {
                   const matchedPayment = payments.find(p => p.fee_id === fee.id);
+                  const isCourseReg = (fee.fee_type || '').toLowerCase().includes('course');
                   return (
-                    <tr key={fee.id}>
-                      <td><strong>{fee.fee_type}</strong></td>
+                    <tr key={fee.id} style={{ background: isCourseReg ? 'rgba(99, 102, 241, 0.02)' : 'transparent' }}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '1.1rem' }}>{getFeeTypeIcon(fee.fee_type)}</span>
+                          <strong>{fee.fee_type}</strong>
+                        </div>
+                      </td>
                       <td style={{ fontSize: '12px' }}>{fee.description}</td>
                       <td><strong style={{ color: 'var(--primary-light)' }}>{formatCurrency(fee.amount)}</strong></td>
                       <td style={{ fontSize: '12px' }}>{formatDate(fee.due_date)}</td>

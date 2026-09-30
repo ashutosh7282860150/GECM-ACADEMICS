@@ -5,6 +5,7 @@ import FeeReceiptPdfModal from '../common/FeeReceiptPdfModal';
 export default function AdminAccountsPage() {
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [transactions] = useState([
+    { id: 'TXN-98422', receiptNo: 'RCPT-2026-9845', student: 'Arjun Patel', roll: 'CSE2021001', dept: 'Computer Science & Engineering', feeType: 'Course Registration Fee', amount: '3500', status: 'PAID', date: '26 SEP 2026' },
     { id: 'TXN-98421', receiptNo: 'RCPT-2026-9842', student: 'Arjun Patel', roll: 'CSE2021001', dept: 'Computer Science & Engineering', feeType: 'Semester 7 Tuition Fee', amount: '14500', status: 'PAID', date: '25 SEP 2026' },
     { id: 'TXN-98420', receiptNo: 'RCPT-2026-9840', student: 'Priya Sharma', roll: 'CSE2021002', dept: 'Computer Science & Engineering', feeType: 'Hostel & Mess Fee', amount: '18000', status: 'PAID', date: '24 SEP 2026' },
     { id: 'TXN-98419', receiptNo: 'RCPT-2026-9819', student: 'Rahul Verma', roll: 'CSE2021003', dept: 'Computer Science & Engineering', feeType: 'Examination Fee', amount: '1500', status: 'PENDING', date: '22 SEP 2026' },

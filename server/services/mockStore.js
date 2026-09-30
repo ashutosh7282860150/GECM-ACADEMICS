@@ -65,7 +65,9 @@ const fees = [
   { id: 'fe1', student_id: 's10', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 7, status: 'paid',    description: 'Semester 7 Tuition Fee', student_name: 'Arjun Patel',  enrollment_no: 'CSE2021001' },
   { id: 'fe2', student_id: 's10', fee_type: 'Hostel Fee',  amount: 25000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 7, status: 'pending', description: 'Semester 7 Hostel Fee',  student_name: 'Arjun Patel',  enrollment_no: 'CSE2021001' },
   { id: 'fe3', student_id: 's10', fee_type: 'Exam Fee',    amount:  2500.00, due_date: '2024-10-15', academic_year: '2024-25', semester: 7, status: 'pending', description: 'Semester 7 Exam Fee',    student_name: 'Arjun Patel',  enrollment_no: 'CSE2021001' },
+  { id: 'fe6', student_id: 's10', fee_type: 'Course Registration Fee', amount: 3500.00, due_date: '2024-10-25', academic_year: '2024-25', semester: 7, status: 'pending', description: 'Semester 7 Core & Elective Course Registration Fee', student_name: 'Arjun Patel', enrollment_no: 'CSE2021001' },
   { id: 'fe4', student_id: 's11', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 7, status: 'paid',    description: 'Semester 7 Tuition Fee', student_name: 'Priya Sharma', enrollment_no: 'CSE2021002' },
+  { id: 'fe7', student_id: 's11', fee_type: 'Course Registration Fee', amount: 3500.00, due_date: '2024-10-25', academic_year: '2024-25', semester: 7, status: 'paid', description: 'Semester 7 Core & Elective Course Registration Fee', student_name: 'Priya Sharma', enrollment_no: 'CSE2021002' },
   { id: 'fe5', student_id: 's12', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 5, status: 'overdue', description: 'Semester 5 Tuition Fee', student_name: 'Rohit Verma',  enrollment_no: 'CSE2022001' }
 ];
 

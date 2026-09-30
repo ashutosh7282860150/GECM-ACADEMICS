@@ -72,17 +72,21 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
       [ndId, req.user.id, `No-dues request submitted: ${reason}`]
     );
 
-    // Notify warden for hostel verification
-    const wardenResult = await pool.query("SELECT id FROM users WHERE role = 'warden' LIMIT 1");
-    if (wardenResult.rows.length > 0) {
-      await pool.query(
-        `INSERT INTO notifications (user_id, title, message, type, reference_type, reference_id)
-         VALUES ($1, 'No-Dues Request', $2, 'action_required', 'no_dues', $3)`,
-        [wardenResult.rows[0].id, `${req.user.name} has submitted a no-dues request requiring hostel verification.`, ndId]
-      );
+    // Notify ALL departments for real-time parallel verification (Admin, HOD, Warden, Accounts, Faculty)
+    const reviewerRoles = ['admin', 'hod', 'warden', 'accounts', 'faculty'];
+    const reviewers = await pool.query("SELECT id, role FROM users WHERE role = ANY($1)", [reviewerRoles]);
+    
+    if (reviewers.rows && reviewers.rows.length > 0) {
+      for (const rev of reviewers.rows) {
+        await pool.query(
+          `INSERT INTO notifications (user_id, title, message, type, reference_type, reference_id)
+           VALUES ($1, 'No-Dues Clearance Request', $2, 'action_required', 'no_dues', $3)`,
+          [rev.id, `${req.user.name} submitted a No-Dues clearance request. Department verification required.`, ndId]
+        );
+      }
     }
 
-    res.status(201).json({ success: true, message: 'No-dues request submitted successfully!', data: result.rows[0] });
+    res.status(201).json({ success: true, message: 'No-dues request submitted and dispatched to all departments!', data: result.rows[0] });
   } catch (err) {
     console.error('No-dues create error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -96,7 +100,14 @@ const updateOverallStatus = async (ndId) => {
   if (!r) return;
 
   let overall = 'pending';
-  const statuses = [r.hostel_status, r.library_status, r.accounts_status, r.admin_status];
+  const statuses = [
+    r.hostel_status || 'pending',
+    r.library_status || 'approved',
+    r.accounts_status || 'pending',
+    r.hod_status || 'approved',
+    r.faculty_status || 'approved',
+    r.admin_status || 'pending'
+  ];
   
   if (statuses.some(s => s === 'rejected')) {
     overall = 'rejected';
@@ -111,7 +122,7 @@ const updateOverallStatus = async (ndId) => {
 };
 
 // PUT /api/nodues/:id/verify - Department verifies
-router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin'), async (req, res) => {
+router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin', 'hod', 'faculty'), async (req, res) => {
   try {
     const { action, remarks } = req.body; // action: 'approved' or 'rejected'
     const ndId = req.params.id;
@@ -125,11 +136,19 @@ router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin')
     } else if (role === 'accounts') {
       statusField = 'accounts_status'; remarksField = 'accounts_remarks';
       verifiedByField = 'accounts_verified_by'; verifiedAtField = 'accounts_verified_at';
-      stepName = 'Accounts Verification';
+      stepName = 'Fee Cell / Accounts Verification';
+    } else if (role === 'hod') {
+      statusField = 'hod_status'; remarksField = 'hod_remarks';
+      verifiedByField = 'hod_verified_by'; verifiedAtField = 'hod_verified_at';
+      stepName = 'HOD CSE Clearance';
+    } else if (role === 'faculty') {
+      statusField = 'faculty_status'; remarksField = 'faculty_remarks';
+      verifiedByField = 'faculty_verified_by'; verifiedAtField = 'faculty_verified_at';
+      stepName = 'Faculty & Labs Clearance';
     } else if (role === 'admin') {
       statusField = 'admin_status'; remarksField = 'admin_remarks';
       verifiedByField = 'admin_verified_by'; verifiedAtField = 'admin_verified_at';
-      stepName = 'Admin Approval';
+      stepName = 'Administrator Final Approval';
     }
 
     await pool.query(
@@ -149,10 +168,10 @@ router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin')
     const ndResult = await pool.query('SELECT nd.*, u.id as user_id FROM no_dues_requests nd JOIN students s ON nd.student_id = s.id JOIN users u ON s.user_id = u.id WHERE nd.id = $1', [ndId]);
     if (ndResult.rows.length > 0) {
       const notifMsg = overallStatus === 'completed'
-        ? 'All departments have approved your No-Dues request! Your certificate is ready.'
+        ? 'All departments (Admin, HOD, Warden, Fee Cell, Faculty) have approved your No-Dues request! Your certificate is ready.'
         : overallStatus === 'rejected'
         ? `Your No-Dues request was rejected at ${stepName}. Reason: ${remarks}`
-        : `${stepName} completed. Status: ${action}. Next step pending.`;
+        : `${stepName} completed (${action}). Real-time clearance in progress.`;
 
       await pool.query(
         `INSERT INTO notifications (user_id, title, message, type, reference_type, reference_id)
@@ -161,19 +180,7 @@ router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin')
       );
     }
 
-    // Admin approval needed: notify admin after accounts
-    if (role === 'accounts' && action === 'approved') {
-      const adminResult = await pool.query("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
-      if (adminResult.rows.length > 0) {
-        await pool.query(
-          `INSERT INTO notifications (user_id, title, message, type, reference_type, reference_id)
-           VALUES ($1, 'No-Dues Pending Admin Approval', 'A no-dues request is ready for your final approval.', 'action_required', 'no_dues', $2)`,
-          [adminResult.rows[0].id, ndId]
-        );
-      }
-    }
-
-    res.json({ success: true, message: `${stepName} ${action} successfully.`, overallStatus });
+    res.json({ success: true, message: `${stepName} ${action} successfully in real-time.`, overallStatus });
   } catch (err) {
     console.error('No-dues verify error:', err);
     res.status(500).json({ success: false, message: 'Server error' });

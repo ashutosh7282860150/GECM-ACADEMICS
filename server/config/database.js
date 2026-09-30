@@ -412,9 +412,11 @@ const query = async (text, params = []) => {
       department_name: 'Computer Science & Engineering',
       steps: [
         { id: 'st1', department: 'hostel', status: 'pending', comment: null },
-        { id: 'st2', department: 'library', status: 'pending', comment: null },
-        { id: 'st3', department: 'accounts', status: 'pending', comment: null },
-        { id: 'st4', department: 'admin', status: 'pending', comment: null }
+        { id: 'st2', department: 'accounts', status: 'pending', comment: null },
+        { id: 'st3', department: 'hod', status: 'pending', comment: null },
+        { id: 'st4', department: 'faculty', status: 'pending', comment: null },
+        { id: 'st5', department: 'library', status: 'pending', comment: null },
+        { id: 'st6', department: 'admin', status: 'pending', comment: null }
       ]
     };
     mockStore.noDuesRequests.unshift(newNd);

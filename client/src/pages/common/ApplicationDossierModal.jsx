@@ -169,21 +169,72 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
           {/* Department Clearance Matrix for No Dues */}
           {app.clearances && app.clearances.length > 0 && (
             <div style={{ background: 'var(--bg-3)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-              <h4 style={{ fontSize: '14px', marginBottom: '12px', color: 'var(--primary-light)' }}>✅ Multi-Department Clearance Matrix</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
-                {app.clearances.map(c => (
-                  <div key={c.department} style={{ padding: '12px', background: 'var(--surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                    <div style={{ fontSize: '12px', fontWeight: '700', marginBottom: '4px' }}>{c.department}</div>
-                    <span className={`badge ${getStatusBadgeClass(c.status)}`} style={{ fontSize: '11px' }}>{getStatusLabel(c.status)}</span>
-                    {c.remarks && <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>{c.remarks}</div>}
-                    {isReviewer && onClearanceUpdate && (
-                      <div style={{ display: 'flex', gap: '4px', marginTop: '8px', justifyContent: 'center' }}>
-                        <button className="btn btn-success btn-sm" style={{ padding: '2px 6px', fontSize: '10px' }} onClick={() => onClearanceUpdate(app.id, c.department, 'APPROVED')}>✓ Clear</button>
-                        <button className="btn btn-danger btn-sm" style={{ padding: '2px 6px', fontSize: '10px' }} onClick={() => onClearanceUpdate(app.id, c.department, 'REJECTED')}>✗ Reject</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h4 style={{ fontSize: '14px', margin: 0, color: 'var(--primary-light)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>✅</span> Real-Time Multi-Department Clearance Matrix
+                </h4>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  {app.clearances.filter(c => c.status === 'APPROVED').length} / {app.clearances.length} Cleared
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                {app.clearances.map(c => {
+                  let deptIcon = '🏢';
+                  const dName = c.department.toLowerCase();
+                  if (dName.includes('hostel') || dName.includes('warden')) deptIcon = '🏠';
+                  else if (dName.includes('account') || dName.includes('fee')) deptIcon = '💰';
+                  else if (dName.includes('hod')) deptIcon = '👨‍🏫';
+                  else if (dName.includes('faculty') || dName.includes('lab')) deptIcon = '🔬';
+                  else if (dName.includes('library')) deptIcon = '📚';
+                  else if (dName.includes('admin')) deptIcon = '🏛️';
+
+                  return (
+                    <div key={c.department} style={{ padding: '14px', background: 'var(--surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>{deptIcon}</span>
+                            <span>{c.department}</span>
+                          </span>
+                          <span className={`badge ${getStatusBadgeClass(c.status)}`} style={{ fontSize: '10px' }}>
+                            {getStatusLabel(c.status)}
+                          </span>
+                        </div>
+                        {c.verified_by && (
+                          <div style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>
+                            ✓ Verified by: {c.verified_by}
+                          </div>
+                        )}
+                        {c.remarks && (
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', fontStyle: 'italic' }}>
+                            "{c.remarks}"
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {isReviewer && onClearanceUpdate && app.current_status !== 'APPROVED' && app.current_status !== 'REJECTED' && (
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed var(--border)' }}>
+                          <button
+                            type="button"
+                            className="btn btn-success btn-sm"
+                            style={{ flex: 1, padding: '4px 8px', fontSize: '11px', fontWeight: 700 }}
+                            onClick={() => onClearanceUpdate(app.id, c.department, 'APPROVED')}
+                          >
+                            ✓ Approve
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            style={{ flex: 1, padding: '4px 8px', fontSize: '11px', fontWeight: 700 }}
+                            onClick={() => onClearanceUpdate(app.id, c.department, 'REJECTED')}
+                          >
+                            ✗ Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

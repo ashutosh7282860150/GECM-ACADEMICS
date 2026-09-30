@@ -57,11 +57,18 @@ let routingConfig = [
     name: 'No Dues Clearance',
     category: 'Academic Clearance',
     icon: '✅',
-    description: 'Multi-department digital clearance for graduation, hostel, or transfer.',
+    description: 'Multi-department digital clearance across Administrator, HOD CSE, Hostel Warden, Fee Cell, All Faculty, and Central Library.',
     responsibleRole: 'admin',
-    responsibleDepartment: 'Administration & Finance',
+    responsibleDepartment: 'Administration & All Departments',
     multiDeptClearance: true,
-    clearanceStages: ['Library', 'Accounts', 'Hostel', 'Department', 'Laboratory', 'Administration'],
+    clearanceStages: [
+      'Administrator',
+      'HOD CSE (Department)',
+      'Hostel Warden',
+      'Fee Cell (Accounts)',
+      'Faculty & Labs',
+      'Central Library'
+    ],
     requiresApproval: true,
     active: true
   },
@@ -194,7 +201,7 @@ if (!mockStore.applications) {
       email: 'student1@smartcampus.edu',
       current_status: 'UNDER_REVIEW',
       assigned_role: 'admin',
-      assigned_department: 'Administration & Finance',
+      assigned_department: 'Administration & All Departments',
       submitted_at: new Date('2026-09-26T09:00:00Z'),
       updated_at: new Date('2026-09-26T09:00:00Z'),
       reviewed_at: null,
@@ -205,17 +212,17 @@ if (!mockStore.applications) {
         requestType: 'graduation'
       },
       clearances: [
-        { department: 'Library', status: 'APPROVED', verified_by: 'Dr. Ramesh Kumar', remarks: 'Books returned' },
-        { department: 'Accounts', status: 'PENDING', verified_by: null, remarks: 'Semester fee pending' },
-        { department: 'Hostel', status: 'APPROVED', verified_by: 'Mr. Suresh Patel', remarks: 'Key returned' },
-        { department: 'Department', status: 'APPROVED', verified_by: 'Prof. Anita Sharma', remarks: 'Labs cleared' },
-        { department: 'Laboratory', status: 'APPROVED', verified_by: 'Dr. Vikram Singh', remarks: 'Equipment returned' },
-        { department: 'Administration', status: 'PENDING', verified_by: null, remarks: 'Awaiting final signoff' }
+        { department: 'Administrator', status: 'PENDING', verified_by: null, remarks: 'Awaiting institutional signoff' },
+        { department: 'HOD CSE (Department)', status: 'APPROVED', verified_by: 'Prof. Anita Sharma (HOD CSE)', remarks: 'Department lab and academic clearance approved' },
+        { department: 'Hostel Warden', status: 'APPROVED', verified_by: 'Mr. Suresh Patel (Warden)', remarks: 'Hostel dues cleared, room key returned' },
+        { department: 'Fee Cell (Accounts)', status: 'PENDING', verified_by: null, remarks: 'Tuition clearance verified' },
+        { department: 'Faculty & Labs', status: 'APPROVED', verified_by: 'Dr. Vikram Singh (Faculty)', remarks: 'CSE Lab equipment returned' },
+        { department: 'Central Library', status: 'APPROVED', verified_by: 'Dr. Ramesh Kumar', remarks: 'All books returned' }
       ],
       documents: [],
       workflow_timeline: [
         { step: 'Application Submitted', status: 'SUBMITTED', performed_by: 'Arjun Patel', timestamp: '2026-09-26T09:00:00Z' },
-        { step: 'Multi-Department Verification', status: 'UNDER_REVIEW', performed_by: 'Clearance Committee', timestamp: '2026-09-26T09:01:00Z' }
+        { step: 'Dispatched to All Departments (Administrator, HOD CSE, Warden, Fee Cell, Faculty, Library)', status: 'UNDER_REVIEW', performed_by: 'System Real-Time Broadcaster', timestamp: '2026-09-26T09:01:00Z' }
       ]
     }
   ];
@@ -275,16 +282,37 @@ router.get('/inbox', authenticate, authorize('admin', 'faculty', 'hod', 'warden'
 
     let inbox = [...mockStore.applications];
 
-    // Filter by role permissions
+    // Filter by role permissions with full support for real-time multi-department No Dues clearance
     if (userRole === 'warden') {
-      inbox = inbox.filter(a => a.assigned_role === 'warden' || a.type_code === 'GECM-GP' || (a.clearances && a.clearances.some(c => c.department === 'Hostel')));
+      inbox = inbox.filter(a =>
+        a.assigned_role === 'warden' ||
+        a.type_code === 'GECM-GP' ||
+        a.type_code === 'GECM-ND' ||
+        (a.clearances && a.clearances.some(c => c.department.toLowerCase().includes('hostel') || c.department.toLowerCase().includes('warden')))
+      );
     } else if (userRole === 'accounts') {
-      inbox = inbox.filter(a => a.assigned_role === 'accounts' || (a.clearances && a.clearances.some(c => c.department === 'Accounts')));
+      inbox = inbox.filter(a =>
+        a.assigned_role === 'accounts' ||
+        a.type_code === 'GECM-ND' ||
+        (a.clearances && a.clearances.some(c => c.department.toLowerCase().includes('account') || c.department.toLowerCase().includes('fee')))
+      );
     } else if (userRole === 'faculty') {
-      inbox = inbox.filter(a => a.assigned_role === 'faculty' || a.type_code === 'GECM-LV');
+      inbox = inbox.filter(a =>
+        a.assigned_role === 'faculty' ||
+        a.type_code === 'GECM-LV' ||
+        a.type_code === 'GECM-ND' ||
+        (a.clearances && a.clearances.some(c => c.department.toLowerCase().includes('faculty') || c.department.toLowerCase().includes('lab') || c.department.toLowerCase().includes('department')))
+      );
     } else if (userRole === 'hod') {
-      inbox = inbox.filter(a => a.assigned_role === 'hod' || a.type_code === 'GECM-BF' || a.type_code === 'GECM-LV');
+      inbox = inbox.filter(a =>
+        a.assigned_role === 'hod' ||
+        a.type_code === 'GECM-BF' ||
+        a.type_code === 'GECM-LV' ||
+        a.type_code === 'GECM-ND' ||
+        (a.clearances && a.clearances.some(c => c.department.toLowerCase().includes('hod') || c.department.toLowerCase().includes('department')))
+      );
     }
+    // 'admin' role sees all applications
 
     // Filter by query parameters
     if (status) {
@@ -372,6 +400,12 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
     const newId = 'app_' + Date.now();
     const now = new Date();
 
+    const isNoDues = typeCode === 'GECM-ND';
+
+    const defaultClearanceStages = isNoDues
+      ? ['Administrator', 'HOD CSE (Department)', 'Hostel Warden', 'Fee Cell (Accounts)', 'Faculty & Labs', 'Central Library']
+      : (config.clearanceStages || ['Administrator', 'Department', 'Accounts']);
+
     const newApp = {
       id: newId,
       application_id: appIdStr,
@@ -396,7 +430,7 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
       correction_note: null,
       form_data: formData,
       documents: formData.uploadedFiles || [],
-      clearances: config.multiDeptClearance ? (config.clearanceStages || ['Library', 'Accounts', 'Hostel', 'Department', 'Laboratory', 'Administration']).map(d => ({
+      clearances: config.multiDeptClearance ? defaultClearanceStages.map(d => ({
         department: d,
         status: 'PENDING',
         verified_by: null,
@@ -413,30 +447,47 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
     };
 
     if (!isDraft) {
-      newApp.workflow_timeline.push({
-        step: `Automatically Routed to ${config.responsibleDepartment}`,
-        status: 'UNDER_REVIEW',
-        performed_by: 'System Central Routing',
-        timestamp: now.toISOString()
-      });
+      if (isNoDues) {
+        newApp.workflow_timeline.push({
+          step: 'Dispatched to All Departments (Administrator, HOD CSE, Hostel Warden, Fee Cell, All Faculty)',
+          status: 'UNDER_REVIEW',
+          performed_by: 'System Real-Time Multi-Department Broadcaster',
+          timestamp: now.toISOString()
+        });
+      } else {
+        newApp.workflow_timeline.push({
+          step: `Automatically Routed to ${config.responsibleDepartment}`,
+          status: 'UNDER_REVIEW',
+          performed_by: 'System Central Routing',
+          timestamp: now.toISOString()
+        });
+      }
       newApp.current_status = 'UNDER_REVIEW';
 
-      // Send real-time notification to all assigned reviewer users & admin
-      const reviewerUsers = mockStore.users.filter(u =>
-        u.role === config.responsibleRole ||
-        (config.responsibleRole === 'admin' && u.role === 'admin') ||
-        (config.responsibleRole === 'hod' && (u.role === 'hod' || u.role === 'faculty')) ||
-        u.role === 'admin' // Admin also has institutional oversight
-      );
+      // Send real-time notification to all assigned reviewer users & departments
+      let targetUsers = [];
+      if (isNoDues) {
+        // Send to ALL departments simultaneously: admin, hod, warden, accounts, faculty
+        targetUsers = mockStore.users.filter(u => ['admin', 'hod', 'warden', 'accounts', 'faculty'].includes(u.role));
+      } else {
+        targetUsers = mockStore.users.filter(u =>
+          u.role === config.responsibleRole ||
+          (config.responsibleRole === 'admin' && u.role === 'admin') ||
+          (config.responsibleRole === 'hod' && (u.role === 'hod' || u.role === 'faculty')) ||
+          u.role === 'admin'
+        );
+      }
 
-      const targetUsers = reviewerUsers.length > 0 ? reviewerUsers : mockStore.users.filter(u => u.role === 'admin');
+      if (targetUsers.length === 0) {
+        targetUsers = mockStore.users.filter(u => u.role === 'admin');
+      }
 
       targetUsers.forEach((rev, idx) => {
         mockStore.notifications.unshift({
           id: 'n_' + Date.now() + '_' + idx,
           user_id: rev.id,
           title: `New ${config.name} Application Received 📬`,
-          message: `${req.user.name} (${newApp.enrollment_no}) submitted ${config.name} (${appIdStr}). Needs review.`,
+          message: `${req.user.name} (${newApp.enrollment_no}) submitted ${config.name} (${appIdStr}). Real-time department clearance required.`,
           type: 'action_required',
           reference_type: 'application',
           reference_id: appIdStr,
@@ -450,7 +501,11 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: isDraft ? 'Draft saved successfully!' : `Application ${appIdStr} submitted! Real-time alert dispatched to ${config.responsibleDepartment}.`,
+      message: isDraft
+        ? 'Draft saved successfully!'
+        : isNoDues
+        ? `No Dues Application ${appIdStr} submitted! Real-time alerts dispatched to Administrator, HOD CSE, Hostel Warden, Fee Cell, and All Faculty.`
+        : `Application ${appIdStr} submitted! Real-time alert dispatched to ${config.responsibleDepartment}.`,
       data: newApp
     });
   } catch (err) {
@@ -572,11 +627,11 @@ router.put('/:id/clearance', authenticate, authorize('admin', 'faculty', 'hod', 
 
     if (!app || !app.clearances) return res.status(404).json({ success: false, message: 'Clearance application not found' });
 
-    const cl = app.clearances.find(c => c.department.toLowerCase() === department.toLowerCase());
+    const cl = app.clearances.find(c => c.department.toLowerCase() === department.toLowerCase() || c.department.toLowerCase().includes(department.toLowerCase()));
     if (cl) {
       cl.status = status;
-      cl.verified_by = req.user.name;
-      cl.remarks = remarks || null;
+      cl.verified_by = `${req.user.name} (${req.user.role.toUpperCase()})`;
+      cl.remarks = remarks || (status === 'APPROVED' ? 'Cleared & Approved' : 'Action Required / Remarks added');
     }
 
     const now = new Date();
@@ -590,6 +645,8 @@ router.put('/:id/clearance', authenticate, authorize('admin', 'faculty', 'hod', 
       app.current_status = 'REJECTED';
     } else if (allApproved) {
       app.current_status = 'APPROVED';
+      app.reviewed_at = now;
+      app.reviewed_by_name = 'All Departments Cleared (Central Signoff)';
     } else {
       app.current_status = 'UNDER_REVIEW';
     }
@@ -597,12 +654,28 @@ router.put('/:id/clearance', authenticate, authorize('admin', 'faculty', 'hod', 
     app.workflow_timeline.push({
       step: `${department} Clearance Updated: ${status}`,
       status: status,
-      performed_by: req.user.name,
+      performed_by: `${req.user.name} (${req.user.role.toUpperCase()})`,
       timestamp: now.toISOString(),
-      comments: remarks
+      comments: remarks || `Department verification updated to ${status}`
     });
 
-    res.json({ success: true, message: `${department} clearance set to ${status}`, data: app });
+    // Send real-time notification to student
+    const studentUser = mockStore.users.find(u => u.name === app.student_name || u.email === app.email) || mockStore.users.find(u => u.role === 'student');
+    if (studentUser) {
+      mockStore.notifications.unshift({
+        id: 'n_' + Date.now(),
+        user_id: studentUser.id,
+        title: `Clearance Update: ${department}`,
+        message: `${department} has marked your clearance as ${status}. Overall status: ${app.current_status}.`,
+        type: status === 'APPROVED' ? 'success' : 'warning',
+        reference_type: 'application',
+        reference_id: app.application_id,
+        is_read: false,
+        created_at: now
+      });
+    }
+
+    res.json({ success: true, message: `${department} clearance set to ${status} in real time!`, data: app });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

@@ -6,10 +6,12 @@ import ApplicationApprovalPdfModal from '../common/ApplicationApprovalPdfModal';
 import toast from 'react-hot-toast';
 
 const STEPS = [
-  { key: 'hostel', label: 'Hostel Verification', icon: '🏠', field: 'hostel_status' },
-  { key: 'library', label: 'Library Verification', icon: '📚', field: 'library_status' },
-  { key: 'accounts', label: 'Accounts Verification', icon: '💰', field: 'accounts_status' },
-  { key: 'admin', label: 'Admin Final Approval', icon: '👤', field: 'admin_status' },
+  { key: 'hostel', label: 'Hostel Warden Verification', icon: '🏠', field: 'hostel_status' },
+  { key: 'accounts', label: 'Fee Cell & Accounts Verification', icon: '💰', field: 'accounts_status' },
+  { key: 'hod', label: 'HOD CSE Clearance', icon: '👨‍🏫', field: 'hod_status' },
+  { key: 'faculty', label: 'Faculty & Lab Clearance', icon: '🔬', field: 'faculty_status' },
+  { key: 'library', label: 'Central Library Verification', icon: '📚', field: 'library_status' },
+  { key: 'admin', label: 'Administrator Final Signoff', icon: '🏛️', field: 'admin_status' },
 ];
 
 export default function NoDuesPage() {
@@ -178,7 +180,7 @@ export default function NoDuesPage() {
               <div className="alert alert-info">
                 <span className="alert-icon">ℹ️</span>
                 <div className="alert-content">
-                  <div className="alert-msg">Your request will be verified by Hostel → Library → Accounts → Admin departments in sequence.</div>
+                  <div className="alert-msg">Your request is dispatched in real-time to Administrator, HOD CSE, Hostel Warden, Fee Cell, All Faculty & Central Library for parallel digital approval.</div>
                 </div>
               </div>
               <div className="modal-footer">

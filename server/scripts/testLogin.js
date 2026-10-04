@@ -39,8 +39,10 @@ function findUserByIdentifier(identifier) {
 const ROLE_ALIAS_MAP = {
   student:       ['student'],
   faculty:       ['faculty', 'hod'],
-  administrator: ['admin', 'hod', 'warden', 'accounts'],
-  admin:         ['admin', 'hod', 'warden', 'accounts'],
+  administrator: ['admin', 'hod', 'warden', 'accounts', 'librarian', 'library'],
+  admin:         ['admin', 'hod', 'warden', 'accounts', 'librarian', 'library'],
+  librarian:     ['librarian', 'library', 'admin'],
+  library:       ['librarian', 'library', 'admin'],
 };
 
 const TESTS = [
@@ -48,6 +50,7 @@ const TESTS = [
   { label: 'Student demo',       email: 'student1@smartcampus.edu',  password: 'Student@123',  requestedRole: 'student',       expectSuccess: true  },
   { label: 'Faculty demo',       email: 'faculty1@smartcampus.edu',  password: 'Faculty@123',  requestedRole: 'faculty',       expectSuccess: true  },
   { label: 'Admin demo',         email: 'admin@smartcampus.edu',     password: 'Admin@123',    requestedRole: 'administrator', expectSuccess: true  },
+  { label: 'Library demo',       email: 'library@smartcampus.edu',   password: 'Admin@123',    requestedRole: 'administrator', expectSuccess: true  },
   { label: 'HOD demo',           email: 'hod.cse@smartcampus.edu',   password: 'Admin@123',    requestedRole: 'administrator', expectSuccess: true  },
   { label: 'Warden demo',        email: 'warden@smartcampus.edu',    password: 'Admin@123',    requestedRole: 'administrator', expectSuccess: true  },
   { label: 'Accounts demo',      email: 'accounts@smartcampus.edu',  password: 'Admin@123',    requestedRole: 'administrator', expectSuccess: true  },

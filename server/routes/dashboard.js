@@ -256,4 +256,40 @@ router.get('/faculty', authenticate, authorize('faculty', 'hod'), async (req, re
   }
 });
 
+// GET /api/dashboard/librarian
+router.get('/librarian', authenticate, authorize('librarian', 'library', 'admin'), async (req, res) => {
+  try {
+    const mockStore = require('../services/mockStore');
+    const totalTitles = (mockStore.libraryBooks || []).length;
+    const totalCopies = (mockStore.libraryBooks || []).reduce((acc, b) => acc + (b.total_copies || 0), 0);
+    const activeBorrowings = (mockStore.libraryCirculations || []).filter(c => c.status === 'Active' || c.status === 'Overdue');
+    const overdueBorrowings = (mockStore.libraryCirculations || []).filter(c => c.status === 'Overdue');
+    const totalFines = overdueBorrowings.reduce((acc, c) => acc + (c.fine_amount || 0), 0);
+    const pendingNoDues = (mockStore.noDuesRequests || []).filter(r => (r.library_status || 'pending') === 'pending').length;
+    const clearedNoDues = (mockStore.noDuesRequests || []).filter(r => r.library_status === 'approved').length;
+
+    res.json({
+      success: true,
+      data: {
+        stats: {
+          totalTitles,
+          totalCopies,
+          activeBorrowings: activeBorrowings.length,
+          overdueCount: overdueBorrowings.length,
+          totalFines,
+          pendingNoDues,
+          clearedNoDues,
+          clearanceRate: `${((clearedNoDues / Math.max(1, clearedNoDues + pendingNoDues)) * 100).toFixed(1)}%`
+        },
+        recentCirculations: (mockStore.libraryCirculations || []).slice(0, 5),
+        recentClearance: (mockStore.noDuesRequests || []).slice(0, 5)
+      }
+    });
+  } catch (err) {
+    console.error('Librarian dashboard error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;
+

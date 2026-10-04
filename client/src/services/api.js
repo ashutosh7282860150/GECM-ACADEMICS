@@ -58,6 +58,7 @@ export const dashboardAPI = {
   warden: () => api.get('/dashboard/warden'),
   accounts: () => api.get('/dashboard/accounts'),
   faculty: () => api.get('/dashboard/faculty'),
+  librarian: () => api.get('/dashboard/librarian'),
 };
 
 // =============================================
@@ -67,6 +68,7 @@ export const studentsAPI = {
   getAll: (params) => api.get('/students', { params }),
   getProfile: () => api.get('/students/profile'),
   getById: (id) => api.get(`/students/${id}`),
+  create: (data) => api.post('/students', data),
 };
 
 // =============================================
@@ -129,6 +131,23 @@ export const noDuesAPI = {
 };
 
 // =============================================
+// LIBRARY API
+// =============================================
+export const libraryAPI = {
+  getStats: () => api.get('/library/stats'),
+  getBooks: (params) => api.get('/library/books', { params }),
+  createBook: (data) => api.post('/library/books', data),
+  deleteBook: (id) => api.delete(`/library/books/${id}`),
+  getCirculations: (params) => api.get('/library/circulations', { params }),
+  issueBook: (data) => api.post('/library/issue', data),
+  returnBook: (id, data) => api.post(`/library/return/${id}`, data),
+  renewBook: (id, data) => api.post(`/library/renew/${id}`, data),
+  getClearanceRequests: (params) => api.get('/library/clearance-requests', { params }),
+  processClearance: (id, data) => api.post(`/library/clearance/${id}`, data),
+};
+
+
+// =============================================
 // GATE PASS API
 // =============================================
 export const gatePassAPI = {
@@ -156,6 +175,7 @@ export const notificationsAPI = {
 export const adminAPI = {
   getUsers: (params) => api.get('/admin/users', { params }),
   createUser: (data) => api.post('/admin/users', data),
+  createStudent: (data) => api.post('/students', data),
   toggleUserStatus: (id) => api.put(`/admin/users/${id}/toggle-status`),
   getDepartments: () => api.get('/admin/departments'),
   getAuditLogs: () => api.get('/admin/audit-logs'),

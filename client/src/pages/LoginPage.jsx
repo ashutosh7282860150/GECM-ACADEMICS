@@ -60,6 +60,12 @@ const ROLES = [
 const EXTRA_DEMOS = {
   administrator: [
     {
+      email: 'library@smartcampus.edu',
+      password: 'Admin@123',
+      label: '📚 Library & No-Dues',
+      hint: 'Central Library Incharge & No-Dues Clearance Desk'
+    },
+    {
       email: 'hod.cse@smartcampus.edu',
       password: 'Admin@123',
       label: 'HOD',
@@ -82,12 +88,14 @@ const EXTRA_DEMOS = {
 
 // Backend role → frontend route mapping (matches App.jsx ProtectedRoute allowedRoles)
 const ROLE_REDIRECT = {
-  student:  '/student/dashboard',
-  faculty:  '/faculty/dashboard',
-  hod:      '/faculty/dashboard',
-  warden:   '/warden/dashboard',
-  accounts: '/accounts/dashboard',
-  admin:    '/admin/dashboard',
+  student:   '/student/dashboard',
+  faculty:   '/faculty/dashboard',
+  hod:       '/faculty/dashboard',
+  warden:    '/warden/dashboard',
+  accounts:  '/accounts/dashboard',
+  librarian: '/library/dashboard',
+  library:   '/library/dashboard',
+  admin:     '/admin/dashboard',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -10,21 +10,19 @@ const { authenticate } = require('../middleware/auth');
 // ─────────────────────────────────────────────────────────────────────────────
 
 // All valid backend role values stored in the database
-const VALID_ROLES = ['student', 'faculty', 'hod', 'warden', 'accounts', 'admin'];
+const VALID_ROLES = ['student', 'faculty', 'hod', 'warden', 'accounts', 'librarian', 'library', 'admin'];
 
 /**
  * Maps the role the user SELECTED on the login UI → the backend role(s) that
  * are accepted for that selection.
- *
- * e.g. A user who picks "Administrator" on the UI can be role: admin|hod|warden|accounts
- *      A user who picks "Faculty" can be role: faculty|hod
- *      A user who picks "Student" must be role: student only
  */
 const ROLE_ALIAS_MAP = {
   student:       ['student'],
   faculty:       ['faculty', 'hod'],
-  administrator: ['admin', 'hod', 'warden', 'accounts'],
-  admin:         ['admin', 'hod', 'warden', 'accounts'],
+  administrator: ['admin', 'hod', 'warden', 'accounts', 'librarian', 'library'],
+  admin:         ['admin', 'hod', 'warden', 'accounts', 'librarian', 'library'],
+  librarian:     ['librarian', 'library', 'admin'],
+  library:       ['librarian', 'library', 'admin'],
   warden:        ['warden', 'admin'],
   accounts:      ['accounts', 'admin'],
   hod:           ['hod', 'faculty', 'admin'],

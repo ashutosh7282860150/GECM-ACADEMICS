@@ -1361,30 +1361,55 @@
   color: #94a3b8;
 }
 
-/* ── 14. Comprehensive Multi-Device Responsive Styles ── */
+/* ── 14. Comprehensive Multi-Device Responsive System ── */
 
-/* Table Wrappers for Mobile Scroll */
+/* Table Wrappers & Touch Scroll */
 .table-responsive,
-.table-wrapper {
+.table-wrapper,
+.gov-table-scroll {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 12px;
+  border-radius: var(--gov-radius-sm);
 }
 
 table {
-  min-width: 540px;
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* Large Desktops / Ultra-Wide PCs (>= 1400px) */
+/* Global Responsive Flex & Grid Utilities */
+.responsive-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.responsive-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* ── 14.1 Large Desktops / Ultra-Wide Displays (>= 1400px) ── */
 @media (min-width: 1400px) {
+  .gov-container {
+    max-width: 1360px;
+  }
   .gov-main-backdrop {
     background-position: center 28%;
     background-size: cover;
   }
 }
 
-/* Laptops and Standard Desktops (< 1200px) */
+/* ── 14.2 Laptops and Standard Desktops (1024px - 1280px) ── */
 @media (max-width: 1200px) {
   .gov-container {
     padding: 0 16px;
@@ -1393,9 +1418,13 @@ table {
     background-position: center 22%;
     background-size: cover;
   }
+  .gov-footer-grid {
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    gap: 20px;
+  }
 }
 
-/* Tablets & Small Laptops (< 992px) */
+/* ── 14.3 Tablets & Small Laptops (769px - 992px) ── */
 @media (max-width: 992px) {
   .gov-main-backdrop {
     background-position: 50% 18%;
@@ -1419,14 +1448,22 @@ table {
   }
   .gov-footer-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 24px;
   }
   .hide-on-mobile-sidebar {
     display: none !important;
   }
+  .app-main,
+  main {
+    padding: 16px !important;
+  }
+  .gov-modal-card {
+    max-width: 90vw;
+    margin: 16px auto;
+  }
 }
 
-/* Tablets (< 768px) */
+/* ── 14.4 Tablets & Large Phones (481px - 768px) ── */
 @media (max-width: 768px) {
   .gov-main-backdrop {
     background-position: 45% 15%;
@@ -1441,34 +1478,38 @@ table {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+    padding: 6px 12px;
   }
   .gov-top-bar-right {
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .gov-brand-main {
-    font-size: 1.05rem;
+    font-size: 1.02rem;
   }
   .gov-brand-fullname {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
   }
   .gov-brand-sub {
     display: none;
   }
   .gov-hero-simple {
-    padding: 36px 0 28px;
+    padding: 32px 0 24px;
   }
   .gov-hero-title-simple {
     font-size: 1.55rem;
   }
   .gov-hero-subtitle-simple {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
   .gov-hero-desc-simple {
-    font-size: 0.85rem;
+    font-size: 0.84rem;
   }
   .gov-hero-actions-simple {
     flex-direction: column;
+    width: 100%;
   }
   .gov-hero-actions-simple button,
   .gov-hero-actions-simple a {
@@ -1492,16 +1533,32 @@ table {
   }
   .gov-modal-card {
     padding: 16px;
-    max-width: 95vw;
-    margin: 10px;
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 12px auto;
   }
   .gov-role-demo-actions {
     flex-direction: column;
   }
+  .hide-on-mobile-text {
+    display: none !important;
+  }
+  .form-row,
+  .gov-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  table {
+    min-width: 520px;
+    font-size: 0.8rem;
+  }
 }
 
-/* Small Mobile Screens (< 480px) */
+/* ── 14.5 Mobile Devices (< 480px) ── */
 @media (max-width: 480px) {
+  html {
+    font-size: 14.5px;
+  }
   .gov-main-backdrop {
     background-position: 42% 10%;
     background-size: cover;
@@ -1510,26 +1567,62 @@ table {
       url('/gecm_campus.jpg');
   }
   .gov-brand-titles {
-    max-width: 190px;
+    max-width: 170px;
   }
   .gov-brand-main {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
   }
   .gov-brand-fullname {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .gov-hero-title-simple {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
   }
   .gov-role-tabs {
     flex-direction: column;
     gap: 4px;
+    width: 100%;
   }
   .gov-filter-pill {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     padding: 4px 8px;
+  }
+  .gov-nav-dropdown-menu {
+    width: calc(100vw - 20px) !important;
+    max-width: 320px !important;
+    right: 0 !important;
+  }
+  .modal,
+  .gov-modal-card {
+    width: 96vw !important;
+    max-width: 96vw !important;
+    padding: 12px !important;
+    margin: 8px auto !important;
+    border-radius: 6px;
+  }
+  .btn,
+  .gov-btn-primary,
+  .gov-btn-outline {
+    font-size: 0.78rem;
+    padding: 7px 12px;
+  }
+}
+
+/* ── 14.6 Ultra-Small Mobile Phones (< 360px) ── */
+@media (max-width: 360px) {
+  .gov-brand-titles {
+    max-width: 140px;
+  }
+  .gov-brand-main {
+    font-size: 0.82rem;
+  }
+  .gov-brand-fullname {
+    font-size: 0.62rem;
+  }
+  .gov-header-content {
+    padding: 4px 6px;
   }
 }

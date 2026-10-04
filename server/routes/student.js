@@ -2,6 +2,82 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
 const { authenticate, authorize } = require('../middleware/auth');
+const bcrypt = require('bcryptjs');
+
+// POST /api/students - Create a new student (permanently stored in DB)
+router.post('/', authenticate, authorize('admin', 'hod'), async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      password = 'Student@123',
+      phone,
+      enrollment_no,
+      roll_no,
+      department_id = 'd1',
+      semester = 1,
+      batch = '2024-2028',
+      gender = 'Male',
+      hostel_resident = false,
+      guardian_name,
+      guardian_phone
+    } = req.body;
+
+    if (!name || !email || !enrollment_no) {
+      return res.status(400).json({ success: false, message: 'Student Name, Email, and Enrollment No are required.' });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    // 1. Insert User Account
+    const userResult = await pool.query(
+      'INSERT INTO users (name, email, password_hash, role, phone) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, phone',
+      [name.trim(), email.toLowerCase().trim(), hash, 'student', phone || '']
+    );
+
+    const createdUser = userResult.rows[0];
+    const userId = createdUser.id;
+
+    // 2. Insert Student Record
+    const studentResult = await pool.query(
+      `INSERT INTO students (user_id, enrollment_no, roll_no, department_id, semester, batch, gender, hostel_resident, guardian_name, guardian_phone)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING *`,
+      [
+        userId,
+        enrollment_no.toUpperCase().trim(),
+        (roll_no || enrollment_no).toUpperCase().trim(),
+        department_id,
+        parseInt(semester) || 1,
+        batch,
+        gender,
+        Boolean(hostel_resident),
+        guardian_name || null,
+        guardian_phone || null
+      ]
+    );
+
+    const createdStudent = studentResult.rows[0];
+
+    res.status(201).json({
+      success: true,
+      message: 'Student account created and saved to database successfully!',
+      data: {
+        ...createdStudent,
+        user: createdUser,
+        name: createdUser.name,
+        email: createdUser.email,
+        phone: createdUser.phone
+      }
+    });
+  } catch (err) {
+    console.error('Student create error:', err);
+    if (err.code === '23505') {
+      return res.status(400).json({ success: false, message: 'A student with this Email or Enrollment No already exists.' });
+    }
+    res.status(500).json({ success: false, message: err.message || 'Server error creating student' });
+  }
+});
 
 // GET /api/students
 router.get('/', authenticate, authorize('admin', 'hod', 'faculty', 'warden', 'accounts'), async (req, res) => {

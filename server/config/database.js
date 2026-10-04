@@ -96,6 +96,78 @@ const query = async (text, params = []) => {
     return { rows: user ? [{ ...user, is_active: user.is_active }] : [], rowCount: user ? 1 : 0 };
   }
 
+  // INSERT INTO users
+  if (cleanSql.includes('insert into users')) {
+    const name = params[0];
+    const email = (params[1] || '').toLowerCase().trim();
+    const password_hash = params[2];
+    const role = params[3] || 'student';
+    const phone = params[4] || null;
+    const newId = 'u_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    const newUser = {
+      id: newId,
+      name,
+      email,
+      password_hash,
+      role,
+      phone,
+      is_active: true,
+      created_at: new Date()
+    };
+    mockStore.users.unshift(newUser);
+    return { rows: [newUser], rowCount: 1 };
+  }
+
+  // INSERT INTO students
+  if (cleanSql.includes('insert into students')) {
+    const userId = params[0];
+    const enrollmentNo = params[1];
+    const rollNo = params[2] || enrollmentNo;
+    const departmentId = params[3] || 'd1';
+    const semester = parseInt(params[4]) || 1;
+    const batch = params[5] || '2024';
+    const gender = params[6] || 'Male';
+    const hostelResident = Boolean(params[7]);
+    const guardianName = params[8] || null;
+    const guardianPhone = params[9] || null;
+
+    const userObj = mockStore.users.find(u => u.id === userId);
+    const deptObj = mockStore.departments.find(d => d.id === departmentId);
+
+    const newStudent = {
+      id: 's_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      user_id: userId,
+      enrollment_no: enrollmentNo,
+      roll_no: rollNo,
+      department_id: departmentId,
+      semester,
+      academic_year: '2024-25',
+      batch,
+      gender,
+      hostel_resident: hostelResident,
+      guardian_name: guardianName,
+      guardian_phone: guardianPhone,
+      name: userObj?.name || 'New Student',
+      email: userObj?.email || '',
+      phone: userObj?.phone || '',
+      department_name: deptObj?.name || 'Computer Science & Engineering',
+      department_code: deptObj?.code || 'CSE'
+    };
+    mockStore.students.unshift(newStudent);
+    return { rows: [newStudent], rowCount: 1 };
+  }
+
+  // UPDATE users TOGGLE STATUS
+  if (cleanSql.includes('update users set is_active')) {
+    const id = params[0];
+    const u = mockStore.users.find(x => x.id === id);
+    if (u) {
+      u.is_active = !u.is_active;
+      return { rows: [{ is_active: u.is_active }], rowCount: 1 };
+    }
+    return { rows: [{ is_active: true }], rowCount: 1 };
+  }
+
   // 3. SELECT ALL users
   if (cleanSql.includes('from users')) {
     return { rows: mockStore.users, rowCount: mockStore.users.length };
@@ -160,18 +232,40 @@ const query = async (text, params = []) => {
   }
 
   // 11. SELECT fees
-  if (cleanSql.includes('from fees') && cleanSql.includes('student_id')) {
-    const studentId = params[0];
-    const studentFees = mockStore.fees.filter(f => f.student_id === studentId || studentId === 's10');
-    return { rows: studentFees, rowCount: studentFees.length };
-  }
   if (cleanSql.includes('from fees')) {
-    return { rows: mockStore.fees, rowCount: mockStore.fees.length };
+    if (cleanSql.includes('where id = $1 and student_id = $2') || cleanSql.includes('id = $1 and student_id = $2')) {
+      const feeId = params[0];
+      const studentId = params[1];
+      const fee = (mockStore.fees || []).find(f => (f.id === feeId || f.id === String(feeId)) && (!studentId || f.student_id === studentId || f.student_id === 's10')) || (mockStore.fees || []).find(f => f.id === feeId);
+      return { rows: fee ? [fee] : [], rowCount: fee ? 1 : 0 };
+    }
+    if (cleanSql.includes('where f.id = $1') || cleanSql.includes('f.id = $1') || cleanSql.includes('where id = $1')) {
+      const feeId = params[0];
+      const fee = (mockStore.fees || []).find(f => f.id === feeId || f.id === String(feeId));
+      return { rows: fee ? [fee] : [], rowCount: fee ? 1 : 0 };
+    }
+    if (cleanSql.includes('student_id = $1') || cleanSql.includes('where student_id = $1') || cleanSql.includes('where f.student_id = $1') || cleanSql.includes('student_id')) {
+      const studentId = params[0];
+      let studentFees = (mockStore.fees || []).filter(f => f.student_id === studentId);
+      if (studentFees.length === 0) {
+        studentFees = (mockStore.fees || []).filter(f => f.student_id === 's10');
+      }
+      return { rows: studentFees, rowCount: studentFees.length };
+    }
+    return { rows: mockStore.fees || [], rowCount: (mockStore.fees || []).length };
   }
 
   // 12. SELECT payments
   if (cleanSql.includes('from payments')) {
-    return { rows: mockStore.payments, rowCount: mockStore.payments.length };
+    if (cleanSql.includes('where p.student_id = $1') || cleanSql.includes('student_id = $1') || cleanSql.includes('where student_id = $1')) {
+      const studentId = params[0];
+      let userPayments = (mockStore.payments || []).filter(p => p.student_id === studentId);
+      if (userPayments.length === 0 && studentId === 's10') {
+        userPayments = (mockStore.payments || []).filter(p => p.student_id === 's10');
+      }
+      return { rows: userPayments, rowCount: userPayments.length };
+    }
+    return { rows: mockStore.payments || [], rowCount: (mockStore.payments || []).length };
   }
 
   // 13. SELECT attendance
@@ -433,6 +527,11 @@ const query = async (text, params = []) => {
         nd.hostel_remarks = params[1];
         nd.hostel_verified_by = params[2];
         nd.hostel_verified_at = new Date();
+      } else if (cleanSql.includes('library_status')) {
+        nd.library_status = params[0];
+        nd.library_remarks = params[1];
+        nd.library_verified_by = params[2];
+        nd.library_verified_at = new Date();
       } else if (cleanSql.includes('accounts_status')) {
         nd.accounts_status = params[0];
         nd.accounts_remarks = params[1];

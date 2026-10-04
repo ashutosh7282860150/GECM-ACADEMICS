@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { dashboardAPI } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/helpers';
+import AdminReportPdfModal from '../common/AdminReportPdfModal';
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedReportPdf, setSelectedReportPdf] = useState(null);
 
   useEffect(() => {
     dashboardAPI.admin()
@@ -32,9 +34,54 @@ export default function AdminDashboard() {
 
   const recentActivity = data?.recentActivity || [];
 
+  const INSTITUTIONAL_REPORTS = [
+    {
+      id: 'REP-ATT-2026',
+      title: 'Semester Attendance Audit Report (75% Mandatory Attendance Gazette)',
+      category: 'Academic Affairs',
+      date: '28 SEP 2026',
+      desc: 'Official debarment and shortage list for B.Tech semester exams across CSE, ECE, Civil and Mechanical engineering branches.'
+    },
+    {
+      id: 'REP-FEE-2026',
+      title: 'Institutional Fee Collection, Revenue & Defaulter Ledger',
+      category: 'Accounts & Finance',
+      date: '25 SEP 2026',
+      desc: 'Comprehensive financial reconciliation of tuition fees, semester registration, hostel rent and mess bill collections for FY 2026-27.'
+    },
+    {
+      id: 'REP-NIRF-2026',
+      title: 'AICTE / NIRF Mandatory Disclosure & Compliance Analytics',
+      category: 'Accreditation & Quality',
+      date: '20 SEP 2026',
+      desc: 'Verified cadre ratios (1:15), laboratory inventory standards, faculty PhD credentials and approved student intake quotas.'
+    },
+    {
+      id: 'REP-SEC-2026',
+      title: 'Hostel Outing, Warden Approvals & Security Gate Pass Log',
+      category: 'Hostel & Campus Security',
+      date: '18 SEP 2026',
+      desc: 'Consolidated security register of active student leaves, biometric gate transactions, warden approvals and night check-in logs.'
+    },
+    {
+      id: 'REP-NODUES-2026',
+      title: 'Central Multi-Department No-Dues Clearance Gazette',
+      category: 'Clearance Committee',
+      date: '15 SEP 2026',
+      desc: 'Semester clearance records across Library, Hostel, Accounts, HOD, Laboratories and Administrative desks for final year batches.'
+    },
+    {
+      id: 'REP-ADM-2026',
+      title: 'Student Admission, Enrolment & Demographic Master Dossier',
+      category: 'Administration',
+      date: '10 SEP 2026',
+      desc: 'Consolidated institutional student roll roster, category allocations, gender ratios and permanent database records.'
+    }
+  ];
+
   const ADMIN_MODULES = [
-    { icon: '🎓', title: 'Student Management', desc: 'Roll lists, branches & bio', route: '/admin/students' },
-    { icon: '👨‍🏫', title: 'Faculty Management', desc: 'Professors & HOD roster', route: '/admin/faculty' },
+    { icon: '🎓', title: 'Student Management', desc: 'Create & manage student records', route: '/admin/students' },
+    { icon: '👨‍🏫', title: 'Faculty Management', desc: 'Professors, HODs & staff roster', route: '/admin/faculty' },
     { icon: '💰', title: 'Accounts & Fee Cell', desc: 'Tuition & mess dues', route: '/admin/accounts' },
     { icon: '📝', title: 'Examination Cell', desc: 'Datesheets & admit cards', route: '/admin/examination' },
     { icon: '📚', title: 'Central Library', desc: 'Books catalog & clearance', route: '/admin/library' },
@@ -61,17 +108,21 @@ export default function AdminDashboard() {
               Campus Administration &amp; Governance
             </h1>
             <p style={{ color: '#475569', fontSize: '0.85rem', marginTop: '2px' }}>
-              Government Engineering College, Madhubani • Institutional Oversight
+              Government Engineering College, Madhubani • Institutional Oversight &amp; Digital Governance
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <NavLink to="/admin/notices" className="gov-btn-primary" style={{ fontSize: '0.82rem' }}>
-              📢 Publish Circular
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <NavLink to="/admin/students" className="gov-btn-primary" style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              🎓 Create / Manage Students
             </NavLink>
-            <NavLink to="/admin/reports" className="gov-btn-outline" style={{ fontSize: '0.82rem' }}>
-              📊 Export Report
-            </NavLink>
+            <button
+              className="gov-btn-outline"
+              style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+              onClick={() => setSelectedReportPdf(INSTITUTIONAL_REPORTS[0])}
+            >
+              📄 Open Official PDF Gazette
+            </button>
           </div>
         </div>
       </div>
@@ -105,7 +156,68 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── 3. ADMINISTRATIVE SERVICES DIRECTORY ── */}
+      {/* ── 3. OFFICIAL INSTITUTIONAL PDF REPORTS & GAZETTES ── */}
+      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '22px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0b1d3a', margin: 0 }}>
+              📄 Official Institutional PDF Gazettes &amp; Reports
+            </h2>
+            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 0 0' }}>
+              Click any report below to view, verify, and print the respective official PDF document.
+            </p>
+          </div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '3px 10px', borderRadius: '999px', border: '1px solid #a7f3d0' }}>
+            ● Live Synchronized ERP Gazettes
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '12px' }}>
+          {INSTITUTIONAL_REPORTS.map((rep) => (
+            <div
+              key={rep.id}
+              style={{
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '16px',
+                background: '#f8fafc',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '12px',
+                transition: 'all 0.15s ease-in-out'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, background: '#e0e7ff', color: '#3730a3', padding: '2px 8px', borderRadius: '4px' }}>
+                    {rep.category}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{rep.date}</span>
+                </div>
+                <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0b1d3a', margin: '0 0 4px 0', lineHeight: 1.4 }}>
+                  {rep.title}
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#475569', margin: 0, lineHeight: 1.4 }}>
+                  {rep.desc}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
+                <button
+                  className="gov-btn-primary"
+                  style={{ flex: 1, fontSize: '0.78rem', padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  onClick={() => setSelectedReportPdf(rep)}
+                >
+                  <span>📄</span> Open Respective PDF
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 4. ADMINISTRATIVE SERVICES DIRECTORY ── */}
       <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '22px' }}>
         <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0b1d3a', marginBottom: '16px' }}>
           🏛️ Institutional Management Modules
@@ -140,7 +252,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── 4. RECENT SYSTEM ACTIVITY LOG ── */}
+      {/* ── 5. RECENT SYSTEM ACTIVITY LOG ── */}
       <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
           <div>
@@ -170,6 +282,14 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {/* ── 6. OFFICIAL PDF REPORT MODAL ── */}
+      {selectedReportPdf && (
+        <AdminReportPdfModal
+          report={selectedReportPdf}
+          onClose={() => setSelectedReportPdf(null)}
+        />
+      )}
     </div>
   );
 }

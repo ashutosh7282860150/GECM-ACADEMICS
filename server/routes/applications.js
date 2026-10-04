@@ -217,12 +217,88 @@ if (!mockStore.applications) {
         { department: 'Hostel Warden', status: 'APPROVED', verified_by: 'Mr. Suresh Patel (Warden)', remarks: 'Hostel dues cleared, room key returned' },
         { department: 'Fee Cell (Accounts)', status: 'PENDING', verified_by: null, remarks: 'Tuition clearance verified' },
         { department: 'Faculty & Labs', status: 'APPROVED', verified_by: 'Dr. Vikram Singh (Faculty)', remarks: 'CSE Lab equipment returned' },
-        { department: 'Central Library', status: 'APPROVED', verified_by: 'Dr. Ramesh Kumar', remarks: 'All books returned' }
+        { department: 'Central Library', status: 'APPROVED', verified_by: 'Mr. Alok Verma (Library Incharge)', remarks: 'All books returned' }
       ],
       documents: [],
       workflow_timeline: [
         { step: 'Application Submitted', status: 'SUBMITTED', performed_by: 'Arjun Patel', timestamp: '2026-09-26T09:00:00Z' },
         { step: 'Dispatched to All Departments (Administrator, HOD CSE, Warden, Fee Cell, Faculty, Library)', status: 'UNDER_REVIEW', performed_by: 'System Real-Time Broadcaster', timestamp: '2026-09-26T09:01:00Z' }
+      ]
+    },
+    {
+      id: 'app_3',
+      application_id: 'GECM-ND-2026-000103',
+      type_code: 'GECM-ND',
+      type_name: 'No Dues Clearance',
+      student_id: 's13',
+      student_name: 'Sneha Gupta',
+      enrollment_no: 'CSE2022002',
+      department_name: 'Computer Science & Engineering',
+      semester: 5,
+      phone: '9900000013',
+      email: 'student4@smartcampus.edu',
+      current_status: 'UNDER_REVIEW',
+      assigned_role: 'librarian',
+      assigned_department: 'Administration & All Departments',
+      submitted_at: new Date('2026-09-29T08:30:00Z'),
+      updated_at: new Date('2026-09-29T08:30:00Z'),
+      reviewed_at: null,
+      reviewed_by_name: null,
+      review_comment: null,
+      form_data: {
+        reason: 'Graduation & Final Provisional Degree Release',
+        requestType: 'graduation'
+      },
+      clearances: [
+        { department: 'Administrator', status: 'PENDING', verified_by: null, remarks: null },
+        { department: 'HOD CSE (Department)', status: 'APPROVED', verified_by: 'Prof. Anita Sharma (HOD CSE)', remarks: 'Credits and semester coursework complete' },
+        { department: 'Hostel Warden', status: 'APPROVED', verified_by: 'Mr. Suresh Patel (Warden)', remarks: 'Gargi Hall G-201 room keys and furniture cleared' },
+        { department: 'Fee Cell (Accounts)', status: 'APPROVED', verified_by: 'Mrs. Priya Mehta (Accounts)', remarks: 'All semester tuition & hostel dues clear' },
+        { department: 'Faculty & Labs', status: 'APPROVED', verified_by: 'Dr. Vikram Singh (Faculty)', remarks: 'Hardware lab kits handed over' },
+        { department: 'Central Library', status: 'PENDING', verified_by: null, remarks: 'Awaiting Central Library Incharge review (0 books pending)' }
+      ],
+      documents: [],
+      workflow_timeline: [
+        { step: 'Application Submitted', status: 'SUBMITTED', performed_by: 'Sneha Gupta', timestamp: '2026-09-29T08:30:00Z' },
+        { step: 'Dispatched to All Departments (Administrator, HOD CSE, Warden, Fee Cell, Faculty, Library)', status: 'UNDER_REVIEW', performed_by: 'System Real-Time Broadcaster', timestamp: '2026-09-29T08:31:00Z' }
+      ]
+    },
+    {
+      id: 'app_4',
+      application_id: 'GECM-ND-2026-000104',
+      type_code: 'GECM-ND',
+      type_name: 'No Dues Clearance',
+      student_id: 's12',
+      student_name: 'Rohit Verma',
+      enrollment_no: 'CSE2022001',
+      department_name: 'Computer Science & Engineering',
+      semester: 5,
+      phone: '9900000012',
+      email: 'student3@smartcampus.edu',
+      current_status: 'UNDER_REVIEW',
+      assigned_role: 'librarian',
+      assigned_department: 'Administration & All Departments',
+      submitted_at: new Date('2026-09-28T10:15:00Z'),
+      updated_at: new Date('2026-09-28T10:15:00Z'),
+      reviewed_at: null,
+      reviewed_by_name: null,
+      review_comment: null,
+      form_data: {
+        reason: 'Semester 5 Academic Clearance & Credit Transfer',
+        requestType: 'other'
+      },
+      clearances: [
+        { department: 'Administrator', status: 'PENDING', verified_by: null, remarks: null },
+        { department: 'HOD CSE (Department)', status: 'APPROVED', verified_by: 'Prof. Anita Sharma (HOD CSE)', remarks: 'Mid-semester performance cleared' },
+        { department: 'Hostel Warden', status: 'APPROVED', verified_by: 'Mr. Suresh Patel (Warden)', remarks: 'Day scholar verification completed' },
+        { department: 'Fee Cell (Accounts)', status: 'PENDING', verified_by: null, remarks: 'Fee audit in progress' },
+        { department: 'Faculty & Labs', status: 'APPROVED', verified_by: 'Dr. Vikram Singh (Faculty)', remarks: 'All lab assignments submitted' },
+        { department: 'Central Library', status: 'PENDING', verified_by: null, remarks: '1 Overdue Book pending return: Cormen Algorithms (LIB-4093), Fine ₹60' }
+      ],
+      documents: [],
+      workflow_timeline: [
+        { step: 'Application Submitted', status: 'SUBMITTED', performed_by: 'Rohit Verma', timestamp: '2026-09-28T10:15:00Z' },
+        { step: 'Dispatched to All Departments (Administrator, HOD CSE, Warden, Fee Cell, Faculty, Library)', status: 'UNDER_REVIEW', performed_by: 'System Real-Time Broadcaster', timestamp: '2026-09-28T10:16:00Z' }
       ]
     }
   ];
@@ -275,7 +351,7 @@ router.get('/my-applications', authenticate, authorize('student'), async (req, r
 // -------------------------------------------------------------
 // 4. GET /api/applications/inbox - Reviewer Applications Inbox
 // -------------------------------------------------------------
-router.get('/inbox', authenticate, authorize('admin', 'faculty', 'hod', 'warden', 'accounts'), async (req, res) => {
+router.get('/inbox', authenticate, authorize('admin', 'faculty', 'hod', 'warden', 'accounts', 'librarian', 'library'), async (req, res) => {
   try {
     const userRole = req.user.role;
     const { status, type, department, search, sortBy } = req.query;
@@ -310,6 +386,13 @@ router.get('/inbox', authenticate, authorize('admin', 'faculty', 'hod', 'warden'
         a.type_code === 'GECM-LV' ||
         a.type_code === 'GECM-ND' ||
         (a.clearances && a.clearances.some(c => c.department.toLowerCase().includes('hod') || c.department.toLowerCase().includes('department')))
+      );
+    } else if (userRole === 'librarian' || userRole === 'library') {
+      inbox = inbox.filter(a =>
+        a.assigned_role === 'librarian' ||
+        a.assigned_role === 'library' ||
+        a.type_code === 'GECM-ND' ||
+        (a.clearances && a.clearances.some(c => c.department.toLowerCase().includes('library')))
       );
     }
     // 'admin' role sees all applications
@@ -467,8 +550,8 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
       // Send real-time notification to all assigned reviewer users & departments
       let targetUsers = [];
       if (isNoDues) {
-        // Send to ALL departments simultaneously: admin, hod, warden, accounts, faculty
-        targetUsers = mockStore.users.filter(u => ['admin', 'hod', 'warden', 'accounts', 'faculty'].includes(u.role));
+        // Send to ALL departments simultaneously: admin, hod, warden, accounts, faculty, librarian
+        targetUsers = mockStore.users.filter(u => ['admin', 'hod', 'warden', 'accounts', 'faculty', 'librarian', 'library'].includes(u.role));
       } else {
         targetUsers = mockStore.users.filter(u =>
           u.role === config.responsibleRole ||
@@ -549,7 +632,7 @@ router.put('/:id/resubmit', authenticate, authorize('student'), async (req, res)
 // -------------------------------------------------------------
 // 8. PUT /api/applications/:id/review - Reviewer Actions (Approve / Reject / Correction)
 // -------------------------------------------------------------
-router.put('/:id/review', authenticate, authorize('admin', 'faculty', 'hod', 'warden', 'accounts'), async (req, res) => {
+router.put('/:id/review', authenticate, authorize('admin', 'faculty', 'hod', 'warden', 'accounts', 'librarian', 'library'), async (req, res) => {
   try {
     const { action, comment, rejectionReason, correctionNote } = req.body; // action: 'APPROVED', 'REJECTED', 'NEEDS_CORRECTION'
     const app = mockStore.applications.find(a => a.id === req.params.id || a.application_id === req.params.id);
@@ -581,6 +664,7 @@ router.put('/:id/review', authenticate, authorize('admin', 'faculty', 'hod', 'wa
       else if (req.user.role === 'hod') roleDeptKeyword = 'hod';
       else if (req.user.role === 'faculty') roleDeptKeyword = 'faculty';
       else if (req.user.role === 'admin') roleDeptKeyword = 'admin';
+      else if (req.user.role === 'librarian' || req.user.role === 'library') roleDeptKeyword = 'library';
 
       const cl = app.clearances.find(c => c.department.toLowerCase().includes(roleDeptKeyword));
       if (cl) {
@@ -650,7 +734,7 @@ router.put('/:id/review', authenticate, authorize('admin', 'faculty', 'hod', 'wa
 // -------------------------------------------------------------
 // 9. PUT /api/applications/:id/clearance - Update Dept Clearance (No Dues)
 // -------------------------------------------------------------
-router.put('/:id/clearance', authenticate, authorize('admin', 'faculty', 'hod', 'warden', 'accounts'), async (req, res) => {
+router.put('/:id/clearance', authenticate, authorize('admin', 'faculty', 'hod', 'warden', 'accounts', 'librarian', 'library'), async (req, res) => {
   try {
     const { department, status, remarks } = req.body; // status: 'APPROVED', 'REJECTED'
     const app = mockStore.applications.find(a => a.id === req.params.id || a.application_id === req.params.id);

@@ -15,6 +15,7 @@ const ROLE_DEMOS = {
   ],
   admin: [
     { email: 'admin@smartcampus.edu',    password: 'Admin@123', name: 'Dr. Ramesh Kumar',  label: 'Administrator' },
+    { email: 'library@smartcampus.edu',  password: 'Admin@123', name: 'Dr. Ramesh Kumar (Library)', label: '📚 Library & No-Dues' },
     { email: 'hod.cse@smartcampus.edu', password: 'Admin@123', name: 'Prof. Anita Sharma', label: 'HOD CSE' },
     { email: 'warden@smartcampus.edu',   password: 'Admin@123', name: 'Mr. Suresh Patel',  label: 'Hostel Warden' },
     { email: 'accounts@smartcampus.edu', password: 'Admin@123', name: 'Mrs. Priya Mehta',  label: 'Fee Cell' }

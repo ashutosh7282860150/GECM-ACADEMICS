@@ -13,7 +13,7 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
 
   if (!app) return null;
 
-  const isReviewer = ['admin', 'faculty', 'hod', 'warden', 'accounts'].includes(userRole);
+  const isReviewer = ['admin', 'faculty', 'hod', 'warden', 'accounts', 'librarian', 'library'].includes(userRole);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -199,6 +199,8 @@ export default function ApplicationDossierModal({ app, onClose, onReview, onClea
                   } else if (userRole === 'hod' && (dName.includes('hod') || dName.includes('department'))) {
                     canClearCard = true;
                   } else if (userRole === 'faculty' && (dName.includes('faculty') || dName.includes('lab'))) {
+                    canClearCard = true;
+                  } else if ((userRole === 'librarian' || userRole === 'library') && dName.includes('library')) {
                     canClearCard = true;
                   }
 

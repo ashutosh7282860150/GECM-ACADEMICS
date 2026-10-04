@@ -1,12 +1,46 @@
+import { useState } from 'react';
 import toast from 'react-hot-toast';
+import AdminReportPdfModal from '../common/AdminReportPdfModal';
 
 export default function AdminReportsPage() {
+  const [selectedReportPdf, setSelectedReportPdf] = useState(null);
+
   const reportsList = [
-    { title: 'Semester Attendance Audit Report (75% Shortage List)', desc: 'List of students with under 75% attendance eligible for debarment review.', category: 'Academic', date: '28 SEP 2026' },
-    { title: 'Institutional Fee Collection & Defaulter Registry', desc: 'Detailed department-wise breakdown of tuition, mess and hostel dues.', category: 'Accounts', date: '25 SEP 2026' },
-    { title: 'AICTE / NIRF Mandatory Disclosure Analytics', desc: 'Faculty cadre ratios, laboratory equipment compliance and student intake data.', category: 'Accreditation', date: '20 SEP 2026' },
-    { title: 'Hostel Outing & Warden Gate Pass Security Log', desc: 'Consolidated report on active outings, biometric entries and warden approvals.', category: 'Hostel & Security', date: '18 SEP 2026' },
-    { title: 'Campus Recruitment & Placement Statistics 2026', desc: 'Branch-wise placement percentage, average CTC and recruiter registration count.', category: 'Placement', date: '15 SEP 2026' }
+    {
+      id: 'REP-ATT-2026',
+      title: 'Semester Attendance Audit Report (75% Shortage List)',
+      desc: 'Official debarment and shortage list for B.Tech semester exams across CSE, ECE, Civil and Mechanical engineering branches.',
+      category: 'Academic',
+      date: '28 SEP 2026'
+    },
+    {
+      id: 'REP-FEE-2026',
+      title: 'Institutional Fee Collection & Defaulter Registry',
+      desc: 'Detailed department-wise breakdown of tuition, mess and hostel dues for FY 2026-27.',
+      category: 'Accounts',
+      date: '25 SEP 2026'
+    },
+    {
+      id: 'REP-NIRF-2026',
+      title: 'AICTE / NIRF Mandatory Disclosure Analytics',
+      desc: 'Faculty cadre ratios, laboratory equipment compliance and student intake data.',
+      category: 'Accreditation',
+      date: '20 SEP 2026'
+    },
+    {
+      id: 'REP-SEC-2026',
+      title: 'Hostel Outing & Warden Gate Pass Security Log',
+      desc: 'Consolidated report on active outings, biometric entries and warden approvals.',
+      category: 'Hostel & Security',
+      date: '18 SEP 2026'
+    },
+    {
+      id: 'REP-PLACE-2026',
+      title: 'Campus Recruitment & Placement Statistics 2026',
+      desc: 'Branch-wise placement percentage, average CTC and recruiter registration count.',
+      category: 'Placement',
+      date: '15 SEP 2026'
+    }
   ];
 
   return (
@@ -26,8 +60,11 @@ export default function AdminReportsPage() {
             </p>
           </div>
 
-          <button className="gov-btn-primary" onClick={() => toast.success('Comprehensive Annual Academic Report 2026 exported')}>
-            📥 Generate Annual Report
+          <button
+            className="gov-btn-primary"
+            onClick={() => setSelectedReportPdf(reportsList[0])}
+          >
+            📥 Generate Annual Report PDF
           </button>
         </div>
       </div>
@@ -49,21 +86,29 @@ export default function AdminReportsPage() {
               <button
                 className="gov-btn-outline"
                 style={{ fontSize: '0.8rem' }}
-                onClick={() => toast.success(`Viewing analytics for ${r.title}`)}
+                onClick={() => setSelectedReportPdf(r)}
               >
-                📊 View Analytics
+                📊 View PDF Report
               </button>
               <button
                 className="gov-btn-primary"
                 style={{ fontSize: '0.8rem' }}
-                onClick={() => toast.success(`Downloaded official PDF for ${r.title}`)}
+                onClick={() => setSelectedReportPdf(r)}
               >
-                📥 Download PDF
+                📥 Download / Print PDF
               </button>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Report PDF Modal */}
+      {selectedReportPdf && (
+        <AdminReportPdfModal
+          report={selectedReportPdf}
+          onClose={() => setSelectedReportPdf(null)}
+        />
+      )}
     </div>
   );
 }

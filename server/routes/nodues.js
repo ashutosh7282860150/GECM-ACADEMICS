@@ -102,7 +102,7 @@ const updateOverallStatus = async (ndId) => {
   let overall = 'pending';
   const statuses = [
     r.hostel_status || 'pending',
-    r.library_status || 'approved',
+    r.library_status || 'pending',
     r.accounts_status || 'pending',
     r.hod_status || 'approved',
     r.faculty_status || 'approved',
@@ -122,26 +122,30 @@ const updateOverallStatus = async (ndId) => {
 };
 
 // PUT /api/nodues/:id/verify - Department verifies
-router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin', 'hod', 'faculty'), async (req, res) => {
+router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin', 'hod', 'faculty', 'librarian', 'library'), async (req, res) => {
   try {
-    const { action, remarks } = req.body; // action: 'approved' or 'rejected'
+    const { action, remarks, department } = req.body; // action: 'approved' or 'rejected'
     const ndId = req.params.id;
     const role = req.user.role;
     
     let statusField, remarksField, verifiedByField, verifiedAtField, stepName;
-    if (role === 'warden') {
+    if (role === 'warden' || department === 'hostel') {
       statusField = 'hostel_status'; remarksField = 'hostel_remarks';
       verifiedByField = 'hostel_verified_by'; verifiedAtField = 'hostel_verified_at';
       stepName = 'Hostel Verification';
-    } else if (role === 'accounts') {
+    } else if (role === 'accounts' || department === 'accounts') {
       statusField = 'accounts_status'; remarksField = 'accounts_remarks';
       verifiedByField = 'accounts_verified_by'; verifiedAtField = 'accounts_verified_at';
       stepName = 'Fee Cell / Accounts Verification';
-    } else if (role === 'hod') {
+    } else if (department === 'library' || role === 'librarian' || role === 'library') {
+      statusField = 'library_status'; remarksField = 'library_remarks';
+      verifiedByField = 'library_verified_by'; verifiedAtField = 'library_verified_at';
+      stepName = 'Central Library Clearance';
+    } else if (role === 'hod' || department === 'hod') {
       statusField = 'hod_status'; remarksField = 'hod_remarks';
       verifiedByField = 'hod_verified_by'; verifiedAtField = 'hod_verified_at';
       stepName = 'HOD CSE Clearance';
-    } else if (role === 'faculty') {
+    } else if (role === 'faculty' || department === 'faculty') {
       statusField = 'faculty_status'; remarksField = 'faculty_remarks';
       verifiedByField = 'faculty_verified_by'; verifiedAtField = 'faculty_verified_at';
       stepName = 'Faculty & Labs Clearance';
@@ -168,7 +172,7 @@ router.put('/:id/verify', authenticate, authorize('warden', 'accounts', 'admin',
     const ndResult = await pool.query('SELECT nd.*, u.id as user_id FROM no_dues_requests nd JOIN students s ON nd.student_id = s.id JOIN users u ON s.user_id = u.id WHERE nd.id = $1', [ndId]);
     if (ndResult.rows.length > 0) {
       const notifMsg = overallStatus === 'completed'
-        ? 'All departments (Admin, HOD, Warden, Fee Cell, Faculty) have approved your No-Dues request! Your certificate is ready.'
+        ? 'All departments (Admin, HOD, Warden, Fee Cell, Faculty, Library) have approved your No-Dues request! Your certificate is ready.'
         : overallStatus === 'rejected'
         ? `Your No-Dues request was rejected at ${stepName}. Reason: ${remarks}`
         : `${stepName} completed (${action}). Real-time clearance in progress.`;

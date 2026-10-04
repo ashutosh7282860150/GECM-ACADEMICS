@@ -43,6 +43,7 @@ import FacultyNoticesPage from './pages/faculty/FacultyNoticesPage';
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UsersPage from './pages/admin/UsersPage';
+import AdminFacultyPage from './pages/admin/AdminFacultyPage';
 import StudentsListPage from './pages/admin/StudentsListPage';
 import DepartmentsPage from './pages/admin/DepartmentsPage';
 import AuditLogsPage from './pages/admin/AuditLogsPage';
@@ -64,6 +65,9 @@ import NoDuesVerifyPage from './pages/warden/NoDuesVerifyPage';
 
 // Accounts Pages
 import AccountsDashboard from './pages/accounts/AccountsDashboard';
+
+// Library Pages
+import LibraryDashboard from './pages/library/LibraryDashboard';
 
 // =============================================
 // ROLE-BASED PROTECTED ROUTE
@@ -90,6 +94,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
       hod: '/faculty/dashboard',
       warden: '/warden/dashboard',
       accounts: '/accounts/dashboard',
+      librarian: '/library/dashboard',
+      library: '/library/dashboard',
       admin: '/admin/dashboard',
     };
     return <Navigate to={ROLE_HOME[user.role] || '/'} replace />;
@@ -159,7 +165,7 @@ const AppRoutes = () => (
     {/* ── 🏛️ ADMIN / STAFF SERVICES ── */}
     <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
     <Route path="/admin/students" element={<ProtectedRoute allowedRoles={['admin', 'hod']}><StudentsListPage /></ProtectedRoute>} />
-    <Route path="/admin/faculty" element={<ProtectedRoute allowedRoles={['admin']}><UsersPage /></ProtectedRoute>} />
+    <Route path="/admin/faculty" element={<ProtectedRoute allowedRoles={['admin']}><AdminFacultyPage /></ProtectedRoute>} />
     <Route path="/admin/accounts" element={<ProtectedRoute allowedRoles={['admin', 'accounts']}><AdminAccountsPage /></ProtectedRoute>} />
     <Route path="/admin/fees" element={<ProtectedRoute allowedRoles={['admin', 'accounts']}><AdminAccountsPage /></ProtectedRoute>} />
     <Route path="/admin/examination" element={<ProtectedRoute allowedRoles={['admin']}><AdminExaminationPage /></ProtectedRoute>} />
@@ -191,6 +197,14 @@ const AppRoutes = () => (
     <Route path="/accounts/fees" element={<ProtectedRoute allowedRoles={['accounts']}><AdminAccountsPage /></ProtectedRoute>} />
     <Route path="/accounts/payments" element={<ProtectedRoute allowedRoles={['accounts']}><AdminAccountsPage /></ProtectedRoute>} />
     <Route path="/accounts/nodues" element={<ProtectedRoute allowedRoles={['accounts', 'admin']}><NoDuesVerifyPage role="accounts" /></ProtectedRoute>} />
+
+    {/* ── 📚 LIBRARY INCHARGE SERVICES ── */}
+    <Route path="/library/dashboard" element={<ProtectedRoute allowedRoles={['librarian', 'library', 'admin']}><LibraryDashboard /></ProtectedRoute>} />
+    <Route path="/library/catalog" element={<ProtectedRoute allowedRoles={['librarian', 'library', 'admin']}><AdminLibraryPage /></ProtectedRoute>} />
+    <Route path="/library/nodues" element={<ProtectedRoute allowedRoles={['librarian', 'library', 'admin']}><AdminLibraryPage /></ProtectedRoute>} />
+    <Route path="/library/circulations" element={<ProtectedRoute allowedRoles={['librarian', 'library', 'admin']}><AdminLibraryPage /></ProtectedRoute>} />
+    <Route path="/library/applications-inbox" element={<ProtectedRoute allowedRoles={['librarian', 'library', 'admin']}><ApplicationsInboxPage /></ProtectedRoute>} />
+    <Route path="/library" element={<ProtectedRoute allowedRoles={['librarian', 'library', 'admin']}><LibraryDashboard /></ProtectedRoute>} />
 
     {/* Fallback */}
     <Route path="*" element={<Navigate to="/" replace />} />

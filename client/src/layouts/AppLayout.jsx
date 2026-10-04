@@ -29,9 +29,8 @@ const ROLE_NAV_CONFIGS = {
   hod: [
     { label: 'Dashboard', icon: '🏠', path: '/faculty/dashboard' },
     { label: 'Department Overview', icon: '🏛️', path: '/departments' },
-    { label: 'Applications Inbox', icon: '📥', path: '/hod/applications-inbox' },
-    { label: 'Faculty Roster', icon: '👨‍🏫', path: '/faculty/students' },
     { label: 'Student Directory', icon: '👥', path: '/hod/students' },
+    { label: 'Applications Inbox', icon: '📥', path: '/hod/applications-inbox' },
     { label: 'Approvals & Workflows', icon: '✅', path: '/hod/approvals' },
   ],
   warden: [
@@ -47,6 +46,20 @@ const ROLE_NAV_CONFIGS = {
     { label: 'Transactions & Receipts', icon: '💳', path: '/accounts/payments' },
     { label: 'No-Dues Clearance', icon: '✅', path: '/accounts/nodues' },
     { label: 'Applications Inbox', icon: '📥', path: '/accounts/applications-inbox' },
+  ],
+  librarian: [
+    { label: 'Library Dashboard', icon: '🏠', path: '/library/dashboard' },
+    { label: 'Book Catalog & Inventory', icon: '📚', path: '/library/catalog' },
+    { label: 'No-Dues Clearance Desk', icon: '✅', path: '/library/nodues' },
+    { label: 'Circulation & Returns', icon: '🔄', path: '/library/circulations' },
+    { label: 'Applications Inbox', icon: '📥', path: '/library/applications-inbox' },
+  ],
+  library: [
+    { label: 'Library Dashboard', icon: '🏠', path: '/library/dashboard' },
+    { label: 'Book Catalog & Inventory', icon: '📚', path: '/library/catalog' },
+    { label: 'No-Dues Clearance Desk', icon: '✅', path: '/library/nodues' },
+    { label: 'Circulation & Returns', icon: '🔄', path: '/library/circulations' },
+    { label: 'Applications Inbox', icon: '📥', path: '/library/applications-inbox' },
   ],
   admin: [
     { label: 'Dashboard', icon: '🏠', path: '/admin/dashboard' },
@@ -73,6 +86,8 @@ const ROLE_TITLES = {
   hod: '👨‍🏫 Faculty & HOD Services',
   warden: '🏨 Hostel & Warden Services',
   accounts: '💰 Accounts Cell Services',
+  librarian: '📚 Central Library & Clearance Services',
+  library: '📚 Central Library & Clearance Services',
   admin: '🏛️ Admin / Staff Services'
 };
 
@@ -207,57 +222,64 @@ export default function AppLayout({ children }) {
   };
 
   return (
-    <div className="app-layout" style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-layout" style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
       
       {/* ── TOP INSTITUTIONAL DASHBOARD NAVIGATION ── */}
       <header className="gov-header" style={{ position: 'sticky', top: 0, zIndex: 1100, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-        <div className="gov-container gov-header-content" style={{ minHeight: '68px', padding: '6px 0' }}>
+        <div className="gov-container gov-header-content" style={{ minHeight: '64px', padding: '6px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           
           {/* Brand Left */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
             <button
               className="gov-hamburger"
-              style={{ display: 'inline-flex', padding: '6px 10px', fontSize: '1.1rem' }}
+              style={{ display: 'inline-flex', padding: '6px 10px', fontSize: '1.1rem', flexShrink: 0 }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Toggle navigation menu"
             >
               ☰
             </button>
 
-            <NavLink to={getDashboardRoute()} className="gov-brand-left" style={{ textDecoration: 'none' }}>
+            <NavLink to={getDashboardRoute()} className="gov-brand-left" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
               <GECMLogo size="small" showText={false} theme="light" />
-              <div className="gov-brand-titles">
-                <div className="gov-brand-main" style={{ fontSize: '1.1rem' }}>GECM ACADEMICS</div>
-                <div className="gov-brand-fullname" style={{ fontSize: '0.78rem' }}>
-                  Government Engineering College, Madhubani
+              <div className="gov-brand-titles" style={{ minWidth: 0, overflow: 'hidden' }}>
+                <div className="gov-brand-main" style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  GECM ACADEMICS
+                </div>
+                <div className="gov-brand-fullname" style={{ fontSize: '0.74rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                  Govt. Engineering College, Madhubani
                 </div>
               </div>
             </NavLink>
           </div>
 
-          {/* Top User Controls & Actions (Role Specific Portal Only) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Top User Controls & Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             {/* User Profile Chip */}
             <NavLink
               to={getProfileRoute()}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                padding: '6px 12px',
+                gap: '6px',
+                padding: '5px 10px',
                 borderRadius: '999px',
                 background: '#f1f5f9',
                 border: '1px solid #e2e8f0',
                 textDecoration: 'none',
                 color: '#0b1d3a',
-                fontSize: '0.84rem',
-                fontWeight: 600
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                maxWidth: '160px',
+                overflow: 'hidden'
               }}
-              title="View Profile"
+              title={`Logged in as ${user?.name || 'Profile'}`}
             >
-              <span style={{ fontSize: '0.95rem' }}>
+              <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>
                 {user?.role === 'student' ? '🎓' : user?.role === 'faculty' || user?.role === 'hod' ? '👨‍🏫' : '🏛️'}
               </span>
-              <span>{user?.name || 'My Profile'}</span>
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user?.name ? user.name.split(' ')[0] : 'Profile'}
+              </span>
             </NavLink>
 
             {/* Notifications Dropdown */}
@@ -265,9 +287,10 @@ export default function AppLayout({ children }) {
               <button
                 type="button"
                 className="gov-btn-outline"
-                style={{ padding: '6px 10px', fontSize: '0.85rem', position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                style={{ padding: '5px 8px', fontSize: '0.85rem', position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                 onClick={() => setNotifOpen(!notifOpen)}
                 title="Real-time Alerts & Notifications"
+                aria-label="Notifications"
               >
                 🔔
                 {unreadCount > 0 && (
@@ -275,7 +298,7 @@ export default function AppLayout({ children }) {
                     background: '#dc2626',
                     color: '#fff',
                     fontSize: '0.68rem',
-                    padding: '1px 6px',
+                    padding: '1px 5px',
                     borderRadius: '999px',
                     fontWeight: 800,
                     animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
@@ -286,10 +309,25 @@ export default function AppLayout({ children }) {
               </button>
 
               {notifOpen && (
-                <div className="gov-nav-dropdown-menu" style={{ width: '330px', right: 0, padding: '12px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)' }}>
+                <div
+                  className="gov-nav-dropdown-menu"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    right: 0,
+                    width: 'min(330px, calc(100vw - 24px))',
+                    maxWidth: '330px',
+                    padding: '12px',
+                    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                    background: '#ffffff',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    zIndex: 1400
+                  }}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginBottom: '8px' }}>
                     <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#0b1d3a' }}>
-                      Notifications &amp; Alerts ({unreadCount} new)
+                      Notifications ({unreadCount} new)
                     </div>
                     {unreadCount > 0 && (
                       <button
@@ -301,7 +339,7 @@ export default function AppLayout({ children }) {
                     )}
                   </div>
                   {notifications.length > 0 ? (
-                    <div style={{ maxHeight: '320px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       {notifications.slice(0, 8).map((n, i) => (
                         <div
                           key={n.id || i}
@@ -340,48 +378,50 @@ export default function AppLayout({ children }) {
             <button
               onClick={handleLogout}
               className="gov-btn-outline"
-              style={{ color: '#dc2626', borderColor: '#ef4444', padding: '6px 12px', fontSize: '0.82rem' }}
+              style={{ color: '#dc2626', borderColor: '#ef4444', padding: '5px 10px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+              title="Sign Out"
             >
-              🚪 Logout
+              🚪 <span className="hide-on-mobile-text">Logout</span>
             </button>
           </div>
         </div>
 
         {/* Role Bar Header */}
-        <div style={{ background: '#0b1d3a', color: '#ffffff', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '6px 0' }}>
-          <div className="gov-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontWeight: 800, fontSize: '0.82rem', color: '#fde68a', letterSpacing: '0.5px' }}>
+        <div style={{ background: '#0b1d3a', color: '#ffffff', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '5px 12px' }}>
+          <div className="gov-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 800, fontSize: '0.8rem', color: '#fde68a', letterSpacing: '0.4px' }}>
                 {ROLE_TITLES[roleKey] || 'Academic Services'}
               </span>
-              <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>|</span>
-              <span style={{ fontSize: '0.78rem', color: '#e2e8f0' }}>
-                Logged in as: <strong>{user?.name}</strong> ({user?.role?.toUpperCase()})
+              <span style={{ color: '#64748b', fontSize: '0.72rem' }}>•</span>
+              <span style={{ fontSize: '0.76rem', color: '#e2e8f0' }}>
+                <strong>{user?.name}</strong> <span style={{ color: '#94a3b8' }}>({user?.role?.toUpperCase()})</span>
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#cbd5e1' }}>
-              <span>{new Date().toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.72rem', color: '#cbd5e1' }}>
+              <span>{new Date().toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Layout Body */}
-      <div style={{ display: 'flex', flex: 1, position: 'relative', minHeight: 'calc(100vh - 105px)' }}>
+      <div style={{ display: 'flex', flex: 1, position: 'relative', minHeight: 'calc(100vh - 105px)', width: '100%' }}>
         
-        {/* Sidebar Overlay on Mobile */}
+        {/* Sidebar Overlay on Mobile & Tablet */}
         {sidebarOpen && (
           <div
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1200 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1200, backdropFilter: 'blur(2px)' }}
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
-        {/* Left Role Navigation Sidebar (Stable & Sticky) */}
+        {/* Left Role Navigation Sidebar (Stable on Desktop, Off-Canvas Drawer on Mobile/Tablet) */}
         <aside
           style={{
             width: '260px',
+            maxWidth: '85vw',
             background: '#ffffff',
             borderRight: '1px solid #e2e8f0',
             padding: '16px 12px',
@@ -390,21 +430,30 @@ export default function AppLayout({ children }) {
             gap: '4px',
             flexShrink: 0,
             ...(sidebarOpen
-              ? { position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 1300, boxShadow: '4px 0 20px rgba(0,0,0,0.2)' }
+              ? { position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 1300, boxShadow: '4px 0 25px rgba(0,0,0,0.25)', overflowY: 'auto' }
               : { position: 'sticky', top: '105px', height: 'calc(100vh - 105px)', overflowY: 'auto', zIndex: 100 })
           }}
           className={sidebarOpen ? '' : 'hide-on-mobile-sidebar'}
         >
           {sidebarOpen && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', padding: '0 6px' }}>
-              <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0b1d3a' }}>Menu Navigation</span>
-              <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '4px 6px', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <GECMLogo size="small" showText={false} theme="light" />
+                <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0b1d3a' }}>GECM Menu</span>
+              </div>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', cursor: 'pointer' }}
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
             </div>
           )}
 
           <div style={{
             padding: '8px 10px',
-            fontSize: '0.75rem',
+            fontSize: '0.74rem',
             fontWeight: 800,
             color: '#b45309',
             textTransform: 'uppercase',
@@ -455,7 +504,7 @@ export default function AppLayout({ children }) {
                 alignItems: 'center',
                 gap: '10px',
                 width: '100%',
-                padding: '8px 12px',
+                padding: '9px 12px',
                 borderRadius: '6px',
                 border: '1px solid #fecaca',
                 background: '#fef2f2',
@@ -472,13 +521,13 @@ export default function AppLayout({ children }) {
         </aside>
 
         {/* Content Area */}
-        <main style={{ flex: 1, padding: '20px 24px', overflowY: 'auto', minWidth: 0 }}>
+        <main style={{ flex: 1, padding: 'clamp(12px, 3vw, 24px)', overflowY: 'auto', minWidth: 0, width: '100%' }}>
           {children}
         </main>
       </div>
 
       {/* Institutional Footer */}
-      <footer className="gov-footer" style={{ borderTop: '1px solid #e2e8f0', background: '#0b1d3a', color: '#94a3b8', padding: '14px 0', fontSize: '0.78rem' }}>
+      <footer className="gov-footer" style={{ borderTop: '1px solid #e2e8f0', background: '#0b1d3a', color: '#94a3b8', padding: '14px 12px', fontSize: '0.78rem' }}>
         <div className="gov-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <div>© 2026 Government Engineering College, Madhubani. All Rights Reserved.</div>
           <div>Department of Science, Technology &amp; Technical Education, Govt. of Bihar</div>

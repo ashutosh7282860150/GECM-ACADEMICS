@@ -86,6 +86,7 @@ const notificationRoutes = require('./routes/notifications');
 const dashboardRoutes = require('./routes/dashboard');
 const workflowRoutes = require('./routes/workflow');
 const applicationRoutes = require('./routes/applications');
+const libraryRoutes = require('./routes/library');
 const path = require('path');
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -106,6 +107,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/workflow', workflowRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/library', libraryRoutes);
 
 
 // =============================================

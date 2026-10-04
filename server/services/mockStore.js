@@ -17,14 +17,17 @@ const ADMIN_HASH   = '$2b$12$KqRGhn2yJko326zERwrSMO.SqyIRApLU3kHvMb.o12V7wb7mSEM
 const STAFF_HASH = ADMIN_HASH;
 
 const departments = [
-  { id: 'd1', name: 'Computer Science & Engineering', code: 'CSE', description: 'Department of Computer Science and Engineering', hod_id: 'u2' },
-  { id: 'd2', name: 'Electronics & Communication', code: 'ECE', description: 'Department of Electronics and Communication Engineering', hod_id: null },
-  { id: 'd3', name: 'Mechanical Engineering', code: 'ME', description: 'Department of Mechanical Engineering', hod_id: null }
+  { id: 'd1', name: 'Computer Science & Engineering', code: 'CSE', description: 'Department of Computer Science & Engineering', hod_id: 'u2' },
+  { id: 'd2', name: 'Electronics & Communication Engineering', code: 'ECE', description: 'Department of Electronics & Communication Engineering', hod_id: null },
+  { id: 'd3', name: 'Mechanical Engineering', code: 'ME', description: 'Department of Mechanical Engineering', hod_id: null },
+  { id: 'd4', name: 'Civil Engineering', code: 'CE', description: 'Department of Civil Engineering', hod_id: null },
+  { id: 'd5', name: 'Electrical Engineering', code: 'EE', description: 'Department of Electrical Engineering', hod_id: null }
 ];
 
 const users = [
-  // ── Administrators ──────────────────────────────────────────────────────────
+  // ── Administrators & Staff ──────────────────────────────────────────────────
   { id: 'u1', name: 'Dr. Ramesh Kumar',  email: 'admin@smartcampus.edu',    password_hash: ADMIN_HASH,   role: 'admin',    phone: '9800000001', is_active: true, created_at: new Date() },
+  { id: 'u8', name: 'Mr. Alok Verma (Library Incharge)', email: 'library@smartcampus.edu', password_hash: STAFF_HASH, role: 'librarian', phone: '9800000008', is_active: true, created_at: new Date() },
   { id: 'u2', name: 'Prof. Anita Sharma',email: 'hod.cse@smartcampus.edu', password_hash: STAFF_HASH,   role: 'hod',      phone: '9800000002', is_active: true, created_at: new Date() },
   { id: 'u3', name: 'Mr. Suresh Patel',  email: 'warden@smartcampus.edu',  password_hash: STAFF_HASH,   role: 'warden',   phone: '9800000003', is_active: true, created_at: new Date() },
   { id: 'u4', name: 'Mrs. Priya Mehta',  email: 'accounts@smartcampus.edu',password_hash: STAFF_HASH,   role: 'accounts', phone: '9800000004', is_active: true, created_at: new Date() },
@@ -68,7 +71,12 @@ const fees = [
   { id: 'fe6', student_id: 's10', fee_type: 'Course Registration Fee', amount: 3500.00, due_date: '2024-10-25', academic_year: '2024-25', semester: 7, status: 'pending', description: 'Semester 7 Core & Elective Course Registration Fee', student_name: 'Arjun Patel', enrollment_no: 'CSE2021001' },
   { id: 'fe4', student_id: 's11', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 7, status: 'paid',    description: 'Semester 7 Tuition Fee', student_name: 'Priya Sharma', enrollment_no: 'CSE2021002' },
   { id: 'fe7', student_id: 's11', fee_type: 'Course Registration Fee', amount: 3500.00, due_date: '2024-10-25', academic_year: '2024-25', semester: 7, status: 'paid', description: 'Semester 7 Core & Elective Course Registration Fee', student_name: 'Priya Sharma', enrollment_no: 'CSE2021002' },
-  { id: 'fe5', student_id: 's12', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 5, status: 'overdue', description: 'Semester 5 Tuition Fee', student_name: 'Rohit Verma',  enrollment_no: 'CSE2022001' }
+  { id: 'fe8', student_id: 's11', fee_type: 'Hostel Fee',  amount: 25000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 7, status: 'pending', description: 'Semester 7 Hostel Fee',  student_name: 'Priya Sharma', enrollment_no: 'CSE2021002' },
+  { id: 'fe5', student_id: 's12', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 5, status: 'pending', description: 'Semester 5 Tuition Fee', student_name: 'Rohit Verma',  enrollment_no: 'CSE2022001' },
+  { id: 'fe9', student_id: 's12', fee_type: 'Exam Fee',    amount:  2500.00, due_date: '2024-10-15', academic_year: '2024-25', semester: 5, status: 'pending', description: 'Semester 5 Exam Fee',    student_name: 'Rohit Verma',  enrollment_no: 'CSE2022001' },
+  { id: 'fe10', student_id: 's13', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 5, status: 'pending', description: 'Semester 5 Tuition Fee', student_name: 'Sneha Gupta',  enrollment_no: 'CSE2022002' },
+  { id: 'fe11', student_id: 's13', fee_type: 'Hostel Fee',  amount: 25000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 5, status: 'pending', description: 'Semester 5 Hostel Fee',  student_name: 'Sneha Gupta',  enrollment_no: 'CSE2022002' },
+  { id: 'fe12', student_id: 's14', fee_type: 'Tuition Fee', amount: 45000.00, due_date: '2024-09-30', academic_year: '2024-25', semester: 7, status: 'pending', description: 'Semester 7 Tuition Fee', student_name: 'Amit Kumar',   enrollment_no: 'ECE2021001' }
 ];
 
 const payments = [
@@ -97,6 +105,83 @@ const hostelAllocations = [
 ];
 
 const noDuesRequests = [
+  {
+    id: 'nd_lib_pending_1',
+    request_number: 'ND-2026-008',
+    student_id: 's12',
+    reason: 'Semester 5 Academic Clearance & Credit Transfer',
+    request_type: 'other',
+    overall_status: 'in_progress',
+    created_at: new Date('2026-09-27T10:15:00Z'),
+    updated_at: new Date('2026-09-28T12:00:00Z'),
+    student_name: 'Rohit Verma',
+    enrollment_no: 'CSE2022001',
+    department_name: 'Computer Science & Engineering',
+    semester: 5,
+    batch: '2022-2026',
+    hostel_status: 'approved',
+    hostel_remarks: 'Day scholar verification completed.',
+    hostel_verified_by: 'Mr. Suresh Patel (Warden)',
+    accounts_status: 'pending',
+    accounts_remarks: 'Fee audit in progress.',
+    accounts_verified_by: null,
+    hod_status: 'approved',
+    hod_remarks: 'Mid-semester performance cleared.',
+    hod_verified_by: 'Prof. Anita Sharma (HOD CSE)',
+    faculty_status: 'approved',
+    faculty_remarks: 'All lab assignments submitted.',
+    faculty_verified_by: 'Dr. Vikram Singh (Faculty)',
+    library_status: 'pending',
+    library_remarks: '1 overdue book pending return (Cormen Algorithms). Fine ₹60 unpaid.',
+    library_verified_by: null,
+    admin_status: 'pending',
+    admin_remarks: null,
+    admin_verified_by: null,
+    steps: [
+      { id: 'nds_r1', department: 'hostel',   status: 'approved', comment: 'Day scholar cleared', updated_by: 'u3', updated_at: '2026-09-27T11:00:00Z' },
+      { id: 'nds_r2', department: 'library',  status: 'pending',  comment: 'Overdue book pending (LIB-4093)', updated_by: null, updated_at: null },
+      { id: 'nds_r3', department: 'accounts', status: 'pending',  comment: 'Awaiting fee receipt verification', updated_by: null, updated_at: null },
+      { id: 'nds_r4', department: 'hod',      status: 'approved', comment: 'Academic clearance cleared', updated_by: 'u2', updated_at: '2026-09-27T14:00:00Z' }
+    ]
+  },
+  {
+    id: 'nd_lib_pending_2',
+    request_number: 'ND-2026-009',
+    student_id: 's13',
+    reason: 'Graduation & Final Provisional Degree Release',
+    request_type: 'graduation',
+    overall_status: 'in_progress',
+    created_at: new Date('2026-09-29T08:30:00Z'),
+    updated_at: new Date('2026-09-29T09:00:00Z'),
+    student_name: 'Sneha Gupta',
+    enrollment_no: 'CSE2022002',
+    department_name: 'Computer Science & Engineering',
+    semester: 5,
+    batch: '2022-2026',
+    hostel_status: 'approved',
+    hostel_remarks: 'Gargi Hall G-201 room keys and furniture cleared.',
+    hostel_verified_by: 'Mr. Suresh Patel (Warden)',
+    accounts_status: 'approved',
+    accounts_remarks: 'All semester tuition & hostel dues clear.',
+    accounts_verified_by: 'Mrs. Priya Mehta (Accounts)',
+    hod_status: 'approved',
+    hod_remarks: 'Department credits satisfied.',
+    hod_verified_by: 'Prof. Anita Sharma (HOD CSE)',
+    faculty_status: 'approved',
+    faculty_remarks: 'Hardware lab kits handed over.',
+    faculty_verified_by: 'Dr. Vikram Singh (Faculty)',
+    library_status: 'pending',
+    library_remarks: '0 books borrowed. Ready for instant digital library clearance signoff.',
+    library_verified_by: null,
+    admin_status: 'pending',
+    admin_remarks: null,
+    admin_verified_by: null,
+    steps: [
+      { id: 'nds_s1', department: 'hostel',   status: 'approved', comment: 'Gargi Hall cleared', updated_by: 'u3', updated_at: '2026-09-29T08:45:00Z' },
+      { id: 'nds_s2', department: 'accounts', status: 'approved', comment: 'Receipts verified', updated_by: 'u4', updated_at: '2026-09-29T08:50:00Z' },
+      { id: 'nds_s3', department: 'library',  status: 'pending',  comment: 'Awaiting Library Incharge stamp', updated_by: null, updated_at: null }
+    ]
+  },
   {
     id: 'nd1',
     request_number: 'ND-2026-001',

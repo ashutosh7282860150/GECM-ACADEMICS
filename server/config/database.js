@@ -19,9 +19,10 @@ const poolConfig = connectionString
   ? {
       connectionString,
       ssl: isRemoteDb ? { rejectUnauthorized: false } : false,
-      max: 10,
+      max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 20000,
+      keepAlive: true,
     }
   : {
       host: process.env.DB_HOST || 'localhost',

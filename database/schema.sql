@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
-  role VARCHAR(20) NOT NULL CHECK (role IN ('student', 'faculty', 'hod', 'warden', 'accounts', 'admin')),
+  role VARCHAR(20) NOT NULL CHECK (role IN ('student', 'faculty', 'hod', 'warden', 'accounts', 'admin', 'librarian')),
   phone VARCHAR(15),
   avatar_url VARCHAR(255),
   is_active BOOLEAN DEFAULT TRUE,
@@ -338,7 +338,51 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_workflow_steps_ref ON workflow_steps(reference_id);
 
--- Unique constraint for attendance upsert
-ALTER TABLE attendance ADD CONSTRAINT IF NOT EXISTS unique_att UNIQUE (student_id, course_id, date);
--- Unique constraint for results upsert
-ALTER TABLE results ADD CONSTRAINT IF NOT EXISTS unique_result UNIQUE (student_id, examination_id);
+-- =============================================
+-- LIBRARY BOOKS & CIRCULATION TABLES
+-- =============================================
+CREATE TABLE IF NOT EXISTS books (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  accession_no VARCHAR(50) NOT NULL UNIQUE,
+  title VARCHAR(200) NOT NULL,
+  author VARCHAR(200) NOT NULL,
+  isbn VARCHAR(50),
+  category VARCHAR(100),
+  total_copies INTEGER DEFAULT 1,
+  available_copies INTEGER DEFAULT 1,
+  shelf_location VARCHAR(100),
+  edition VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS book_issues (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  accession_no VARCHAR(50) NOT NULL,
+  book_id UUID REFERENCES books(id) ON DELETE SET NULL,
+  book_title VARCHAR(200),
+  student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+  issue_date DATE NOT NULL,
+  due_date DATE NOT NULL,
+  return_date DATE,
+  fine_amount DECIMAL(10, 2) DEFAULT 0,
+  fine_paid BOOLEAN DEFAULT FALSE,
+  status VARCHAR(20) DEFAULT 'Active' CHECK (status IN ('Active', 'Returned', 'Overdue')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for library
+CREATE INDEX IF NOT EXISTS idx_books_accession ON books(accession_no);
+CREATE INDEX IF NOT EXISTS idx_books_category ON books(category);
+CREATE INDEX IF NOT EXISTS idx_book_issues_student ON book_issues(student_id);
+CREATE INDEX IF NOT EXISTS idx_book_issues_status ON book_issues(status);
+
+-- Unique constraint for attendance and results upsert
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'unique_att') THEN
+    ALTER TABLE attendance ADD CONSTRAINT unique_att UNIQUE (student_id, course_id, date);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'unique_result') THEN
+    ALTER TABLE results ADD CONSTRAINT unique_result UNIQUE (student_id, examination_id);
+  END IF;
+END $$;
